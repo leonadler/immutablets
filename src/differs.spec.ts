@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { differs } from './differs';
 
 describe('different()', () => {
+
     it('returns false for (5, 5)', () => {
         expect(differs(5, 5)).to.be.false;
     });

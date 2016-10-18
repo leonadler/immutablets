@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { deepEqual } from './deep-equal';
 
 describe('deepEqual()', () => {
+
     it('returns true for (5, 5)', () => {
         expect(deepEqual(5, 5)).to.be.true;
     });
@@ -85,6 +86,14 @@ describe('deepEqual()', () => {
         expect(deepEqual({a: {b: 1}}, {a: {b: 2}})).to.be.false;
     });
 
+    it('returns false for ({a: 1, b: 2}, {a: 1}})', () => {
+        expect(deepEqual({a: 1, b: 2}, {a: 1} as any)).to.be.false;
+    });
+
+    it('returns false for ({a: 1}, {a: 1, b: 2}})', () => {
+        expect(deepEqual({a: 1}, {a: 1, b: 2} as any)).to.be.false;
+    });
+
     it('returns true for ([1, 2, 3], [1, 2, 3])', () => {
         expect(deepEqual([1, 2, 3], [1, 2, 3])).to.be.true;
     });
@@ -100,4 +109,75 @@ describe('deepEqual()', () => {
     it('returns false for ([{a: 1}, {b: 2}], [{b: 2}, {a: 1}])', () => {
         expect(deepEqual([{a: 1}, {b: 2}], [{b: 2}, {a: 1}])).to.be.false;
     });
+
+    it('returns true for ({fn: functionA}, {fn: functionA})', () => {
+        const functionA = () => {};
+        expect(deepEqual({fn: functionA}, {fn: functionA})).to.be.true;
+    });
+
+    it('returns false for ({fn: functionA}, {fn: functionB})', () => {
+        const functionA = () => {};
+        const functionB = () => {};
+        expect(deepEqual({fn: functionA}, {fn: functionB})).to.be.false;
+    });
+
+    it('returns false for (Object, SomeClass)', () => {
+        class SomeClass { };
+        expect(deepEqual({}, new SomeClass())).to.be.false;
+    });
+
+    it('returns true for (SomeClass {a: 1}, SomeClass {a: 1})', () => {
+        class SomeClass { a: number; };
+        let objA = new SomeClass(); objA.a = 1;
+        let objB = new SomeClass(); objB.a = 1;
+        expect(deepEqual(objA, objB)).to.be.true;
+    });
+
+    it('returns false for (SomeClass {a: 1}, SomeClass {a: 2})', () => {
+        class SomeClass { a: number; }
+        let objA = new SomeClass(); objA.a = 1;
+        let objB = new SomeClass(); objB.a = 2;
+        expect(deepEqual(objA, objB)).to.be.false;
+    });
+
+    it('returns false for (SomeClass {a: 1}, OtherClass {a: 1})', () => {
+        class SomeClass { a: number; };
+        let objA = new SomeClass(); objA.a = 1;
+
+        class OtherClass { a: number; };
+        let objB = new OtherClass(); objB.a = 1;
+
+        expect(deepEqual(objA, objB)).to.be.false;
+    });
+
+    it('returns true for deeply equal nested objects', () => {
+        let original = {
+            coords: { x: 5, y: 3.14 },
+            name: 'Spaceship',
+            pilot: { id: 1, name: 'Pilot one' }
+        };
+        let copy = {
+            coords: { x: 5, y: 3.14 },
+            name: 'Spaceship',
+            pilot: { id: 1, name: 'Pilot one' }
+        };
+
+        expect(deepEqual(original, copy)).to.be.true;
+    });
+
+    it('returns false for not-deep-equal nested objects', () => {
+        let ship = {
+            coords: { x: 5, y: 3.14 },
+            name: 'Spaceship',
+            pilot: { id: 1, name: 'Pilot one' }
+        };
+        let otherShip = {
+            coords: { x: 5, y: 3.14 },
+            name: 'Spaceship',
+            pilot: { id: 1, name: 'Pilot two' }
+        };
+
+        expect(deepEqual(ship, otherShip)).to.be.false;
+    });
+
 });

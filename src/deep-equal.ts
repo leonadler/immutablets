@@ -52,7 +52,18 @@ export function deepEqual(a: any, b: any): boolean {
             }
 
             // Plain object or custom prototype
-            for (let key of Object.keys(a)) {
+            const keysA = Object.keys(a).sort();
+            const keysB = Object.keys(b).sort();
+            if (keysA.length !== keysB.length) {
+                return false;
+            }
+
+            for (let i = 0; i < keysA.length; i++) {
+                let key = keysA[i];
+                if (key !== keysB[i]) {
+                    return false;
+                }
+
                 if (!deepEqual(a[key], b[key])) {
                     return false;
                 }
