@@ -5,6 +5,7 @@ const gulp: any = require('gulp');
 import mocha = require('gulp-mocha');
 import sourcemaps = require('gulp-sourcemaps');
 import ts = require('gulp-typescript');
+import { log, colors } from 'gulp-util';
 require('source-map-support').install({});
 
 
@@ -38,11 +39,16 @@ function watch() {
 
 function test() {
     const watching = process.argv.some(arg => arg === 'watch');
+    process.exitCode = 0;
+
     return gulp.src(['src/**/*.spec.ts'])
         .pipe(mocha({
             reporter: watching ? 'min' : 'spec'
         }))
-        .on('error', function () {
+        .on('error', function (error: Error) {
+            if (error.name === 'TSError') {
+                log(colors.red(error.message));
+            }
             process.exitCode = 1;
             this.emit('end');
         });

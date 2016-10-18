@@ -29,9 +29,10 @@
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/del": "^2.2.31",
-    "@types/gulp-mocha": "0.0.29",    
+    "@types/gulp-mocha": "0.0.29",
     "@types/gulp-sourcemaps": "0.0.29",
     "@types/gulp-typescript": "0.0.32",
+    "@types/gulp-util": "^3.0.29",
     "@types/mocha": "^2.2.32",
     "@types/orchestrator": "0.0.30",
     "@types/source-map-support": "^0.2.28",
