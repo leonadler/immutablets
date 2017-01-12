@@ -58,15 +58,15 @@ describe('different()', () => {
     it('returns false for (["a"], ["a"])', () => {
         expect(differs(['a'], ['a'])).to.be.false;
     });
-    
+
     it('returns false for ([1, 2, 3], [1, 2, 3])', () => {
         expect(differs([1, 2, 3], [1, 2, 3])).to.be.false;
     });
-    
+
     it('returns false for ([null, false], [null, false])', () => {
         expect(differs([null, false], [null, false])).to.be.false;
     });
-    
+
     it('returns false for ([undefined, null], [undefined, null])', () => {
         expect(differs([undefined, null], [undefined, null])).to.be.false;
     });
@@ -78,29 +78,29 @@ describe('different()', () => {
     it('returns true for (["a"], ["b"])', () => {
         expect(differs(['a'], ['b'])).to.be.true;
     });
-    
+
     it('returns true for ([1, 2, 3], [1])', () => {
         expect(differs([1, 2, 3], [1])).to.be.true;
     });
-    
+
     it('returns true for (["a"], ["a", null])', () => {
         expect(differs(['a'], ['a', null])).to.be.true;
     });
-    
+
     it('returns true for ([true], [false])', () => {
         expect(differs([true], [false])).to.be.true;
     });
-    
+
     it('returns true for ([{}], [{}])', () => {
         expect(differs([{}], [{}])).to.be.true;
     });
-    
+
     it('does not deep-compare objects', () => {
         let objA = { albums: ['Abbey Road', 'Past Masters'] };
         let objB = { albums: ['Abbey Road', 'Past Masters'] };
         expect(differs(objA, objB)).to.be.true;
     });
-    
+
     it('does not deep-compare arrays', () => {
         let arrA = [ [ 'key1', 'value1' ], [ 'key2', 'value2' ] ];
         let arrB = [ [ 'key1', 'value1' ], [ 'key2', 'value2' ] ];
