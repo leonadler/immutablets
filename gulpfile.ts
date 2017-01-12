@@ -1,12 +1,13 @@
 'use strict';
 
 import del = require('del');
-const gulp: any = require('gulp');
+const gulp = require('gulp');
 import mocha = require('gulp-mocha');
 import sourcemaps = require('gulp-sourcemaps');
 import ts = require('gulp-typescript');
 import { log, colors } from 'gulp-util';
-require('source-map-support').install({});
+import { install as installSourceMapSupport } from 'source-map-support';
+installSourceMapSupport();
 
 
 gulp.task('clean', clean);
