@@ -89,6 +89,33 @@ describe('deepClone()', () => {
             expect(clone.a.b.c.d.e).to.equal(3.14);
         });
 
+        it('clones to a specified depth (0)', () => {
+            const original = { first: { second: { third: { fourth: '5' } } } };
+            const clone = deepClone(original, 0);
+            expect(clone).not.to.equal(original);
+            expect(clone).to.deep.equal(original);
+            expect(clone.first).to.equal(original.first);
+        });
+
+        it('clones to a specified depth (1)', () => {
+            const original = { first: { second: { third: { fourth: '5' } } } };
+            const clone = deepClone(original, 1);
+            expect(clone).not.to.equal(original);
+            expect(clone).to.deep.equal(original);
+            expect(clone.first).not.to.equal(original.first);
+            expect(clone.first.second).to.equal(original.first.second);
+        });
+
+        it('clones to a specified depth (2)', () => {
+            const original = { first: { second: { third: { fourth: '5' } } } };
+            const clone = deepClone(original, 2);
+            expect(clone).not.to.equal(original);
+            expect(clone).to.deep.equal(original);
+            expect(clone.first).not.to.equal(original.first);
+            expect(clone.first.second).not.to.equal(original.first.second);
+            expect(clone.first.second.third).to.equal(original.first.second.third);
+        });
+
     });
 
     describe('for arrays', () => {
@@ -130,9 +157,36 @@ describe('deepClone()', () => {
             expect(clone[0][0][0][0][0]).to.equal(3.14);
         });
 
+        it('clones to a specified depth (0)', () => {
+            const original = [ [ [ [ [ 0 ] ] ] ] ];
+            const clone = deepClone(original, 0);
+            expect(clone).to.deep.equal(original);
+            expect(clone).not.to.equal(original);
+            expect(clone[0]).to.equal(original[0]);
+        });
+
+        it('clones to a specified depth (1)', () => {
+            const original = [ [ [ [ [ 0 ] ] ] ] ];
+            const clone = deepClone(original, 1);
+            expect(clone).to.deep.equal(original);
+            expect(clone).not.to.equal(original);
+            expect(clone[0]).not.to.equal(original[0]);
+            expect(clone[0][0]).to.equal(original[0][0]);
+        });
+
+        it('clones to a specified depth (2)', () => {
+            const original = [ [ [ [ [ 0 ] ] ] ] ];
+            const clone = deepClone(original, 2);
+            expect(clone).to.deep.equal(original);
+            expect(clone).not.to.equal(original);
+            expect(clone[0]).not.to.equal(original[0]);
+            expect(clone[0][0]).not.to.equal(original[0][0]);
+            expect(clone[0][0][0]).to.equal(original[0][0][0]);
+        });
+
     });
 
-    describe('for built-in classes', () => {
+    describe('for built-in objects', () => {
 
         it('clones RegExp objects', () => {
             const original = /abc/i;
@@ -146,6 +200,60 @@ describe('deepClone()', () => {
             const clone = deepClone(original);
             expect(clone).to.deep.equal(original);
             expect(clone).not.to.equal(original);
+        });
+
+        it('clones Map objects', () => {
+            const a = {}, b = {}, c = {};
+            const original = new Map([[a, 1], [b, 2]]);
+            const clone = deepClone(original);
+            expect(clone).to.deep.equal(original);
+            expect(clone).not.to.equal(original);
+            expect(original.get(a)).to.equal(1);
+            expect(original.get(b)).to.equal(2);
+            expect(original.has(c)).to.be.false;
+
+            clone.set(a, 999);
+            clone.set(c, 4);
+            expect(original.get(a)).to.equal(1);
+            expect(original.has(c)).to.be.false;
+        });
+
+        it('clones Set objects', () => {
+            const a = {}, b = {}, c = {};
+            const original = new Set([a, b]);
+            const clone = deepClone(original);
+            expect(clone).to.deep.equal(original);
+            expect(clone).not.to.equal(original);
+            expect(clone.has(a)).to.be.true;
+            expect(clone.has(b)).to.be.true;
+            expect(clone.has(c)).to.be.false;
+
+            clone.add(c);
+            expect(clone.has(c)).to.be.true;
+            expect(original.has(c)).to.be.false;
+        });
+
+        it('clones functions', () => {
+            let calledWith: number = 0;
+            const original = {
+                double(n: number): number {
+                    calledWith = n;
+                    return 2 * n;
+                }
+            };
+            const clone = deepClone(original);
+            expect(clone.double).to.be.a('function');
+            expect(clone.double).not.to.equal(original.double);
+            expect(clone.double(5)).to.equal(10);
+            expect(calledWith).to.equal(5);
+        });
+
+        it('clones function properties', () => {
+            const original = { someFunction() { } } as any;
+            original.someFunction.property = { color: 'red' };
+            const clone = deepClone(original);
+            expect(clone.someFunction.property).to.deep.equal(original.someFunction.property);
+            expect(clone.someFunction.property).not.to.equal(original.someFunction.property);
         });
 
     });

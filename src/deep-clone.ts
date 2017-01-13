@@ -1,33 +1,57 @@
 declare var Node: any;
 
 /**
- * Create a deep clone that is equal by value and different by reference.
+ * Create a deep clone that is equal by value but different by reference.
  * The clone will have the same prototype as the original with all own properties copied / cloned.
  */
 export function deepClone<T>(original: T): T;
 
-export function deepClone<T>(original: any): any {
-    if (!original) {
+/**
+ * Create a shallow/deep clone to a specific depth.
+ * The clone is equal to the original by value but different by reference
+ * and will have the same prototype as the original with all own properties copied / cloned.
+ */
+export function deepClone<T>(original: T, depth?: number): T;
+
+
+export function deepClone(original: any, depth: number = Number.POSITIVE_INFINITY): any {
+    if (!original || depth < 0) {
         return original;
     } else if (Array.isArray(original)) {
-        return original.map(deepClone);
-    } else if (typeof original === 'object') {
-        let prototype = Object.getPrototypeOf(original);
+        return original.map(val => deepClone(val, depth - 1));
+    }
+
+    const typeofOriginal = typeof original;
+    if (typeofOriginal === 'object') {
+        const prototype = Object.getPrototypeOf(original);
 
         if (prototype === RegExp.prototype) {
             return new RegExp(original);
         } else if (prototype === Date.prototype) {
             return new Date(original);
+        } else if (typeof (Map as any) === 'function' && prototype === Map.prototype) {
+            return new Map(original);
+        } else if (typeof (Set as any) === 'function' && prototype === Set.prototype) {
+            return new Set(original);
         } else if (typeof Node === 'function' && original instanceof Node && typeof original.cloneNode === 'function') {
             return original.cloneNode(true);
         }
 
-        let clone = Object.create(prototype);
-        for (let key of Object.keys(original)) {
-            clone[key] = deepClone(original[key]);
-        }
-        return clone;
+        const clone = Object.create(prototype);
+        return clonePropsTo(clone, original, depth);
+    } else if (typeofOriginal === 'function') {
+        const clone: any = function() {
+            return original.apply(this, arguments);
+        };
+        return clonePropsTo(clone, original, depth);
     } else {
         return original;
     }
+}
+
+function clonePropsTo(target: any, source: any, depth: number): any {
+    for (let key of Object.keys(source)) {
+        target[key] = deepClone(source[key], depth - 1);
+    }
+    return target;
 }
