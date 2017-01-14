@@ -34,8 +34,8 @@ function build() {
 }
 
 function watch() {
-    gulp.watch(['src/**', '!src/**/*.spec.ts'], gulp.series(build));
-    gulp.watch(['src/**'], gulp.series(test));
+    gulp.watch(['src/**', '!src/**/*.spec.ts'], gulp.series(test, build));
+    gulp.watch(['src/**/*.spec.ts'], gulp.series(test));
 }
 
 function test() {
