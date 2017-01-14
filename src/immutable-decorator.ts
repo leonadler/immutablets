@@ -61,9 +61,9 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
             this[key] = (instance as any)[key];
         }
     }
-    mappedClass.prototype = Object.create(originalClass.prototype);
 
     const originalPrototype = originalClass.prototype as any;
+    const mappedPrototype: any = mappedClass.prototype = Object.create(originalClass.prototype);
 
     const metadata: ImmutableMetadata = {
         cloneDepth: depth,
@@ -74,10 +74,17 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
     // Map methods of the original class
     for (let propertyKey of Object.getOwnPropertyNames(originalPrototype)) {
         let method = originalPrototype[propertyKey];
-        if (typeof method === 'function') {
-            mappedClass.prototype[propertyKey] = createMethodWrapper(method, metadata);
+        if (propertyKey !== 'constructor' && typeof method === 'function') {
+            mappedPrototype[propertyKey] = createMethodWrapper(method, metadata);
         }
     }
+
+    Object.defineProperty(mappedPrototype, 'constructor', {
+        configurable: true,
+        enumerable: false,
+        value: mappedClass,
+        writable: true
+    });
 
     // Copy static methods and properties
     for (let staticKey of Object.getOwnPropertyNames(originalClass)) {
@@ -87,7 +94,7 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
     }
 
     // Define immutable-specific metadata
-    for (let target of [mappedClass, mappedClass.prototype]) {
+    for (let target of [mappedClass, mappedPrototype]) {
         Object.defineProperty(target, immutableSymbol, {
             configurable: true,
             enumerable: false,

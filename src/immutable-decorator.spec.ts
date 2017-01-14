@@ -28,6 +28,7 @@ describe('createImmutableClass', () => {
 
         expect(OtherClass.prototype.login).to.be.a('function');
         expect(OtherClass.prototype.logout).to.be.a('function');
+        expect(OtherClass.prototype.constructor).to.equal(OtherClass);
         expect(new OtherClass()).to.be.an.instanceOf(MyClass);
     })
 
