@@ -71,10 +71,18 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
         settings: globalSettings
     };
 
+    // Map methods of the original class
     for (let propertyKey of Object.getOwnPropertyNames(originalPrototype)) {
         let method = originalPrototype[propertyKey];
         if (typeof method === 'function') {
             mappedClass.prototype[propertyKey] = createMethodWrapper(method, metadata);
+        }
+    }
+
+    // Copy static methods and properties
+    for (let staticKey of Object.getOwnPropertyNames(originalClass)) {
+        if (!Object.prototype.hasOwnProperty.call(mappedClass, staticKey)) {
+            Object.defineProperty(mappedClass, staticKey, Object.getOwnPropertyDescriptor(originalClass, staticKey));
         }
     }
 

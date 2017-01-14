@@ -134,6 +134,17 @@ describe('createImmutableClass', () => {
         expect(returned).to.have.property('color').that.equals('red');
     });
 
+    it('copies all static properties from the original constructor', () => {
+        @Immutable()
+        class ExampleClass {
+            static numbers = [1, 2, 3];
+            static getPI() { return 3.14; }
+        }
+
+        expect(ExampleClass).to.have.property('numbers').which.deep.equals([1, 2, 3]);
+        expect(ExampleClass.getPI()).to.equal(3.14);
+    });
+
     it('passes all parameters to the original constructor', () => {
         let calledWith = [] as any[];
 
