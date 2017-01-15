@@ -101,7 +101,8 @@ function createMutationDiff(mutations: InputMutations, argNames: string[]): stri
 }
 
 
-function getFunctionName(fn: Function): string {
+/** @internal */
+export function getFunctionName(fn: Function): string {
     if (Object.prototype.hasOwnProperty.call(fn, 'name')) {
         return fn.name;
     }

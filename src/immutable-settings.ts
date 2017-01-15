@@ -1,5 +1,11 @@
+import { ImmutableSettings } from './immutable-interfaces';
+
+
 /** @internal */
 export const immutableSymbol = Symbol('ImmutableSettings');
+
+/** @internal */
+export const immutableObserversSymbol = Symbol('ImmutableObservers');
 
 /** @internal */
 export const globalSettings: ImmutableSettings = {
@@ -13,14 +19,6 @@ export function getSettings(target?: any): ImmutableSettings | undefined {
     } else {
         return globalSettings;
     }
-}
-
-export interface ImmutableSettings {
-    /**
-     * Enable strict mutability checks for methods.
-     * Has a negative performance impact, only enable in development and testing.
-     */
-    checkMutability: boolean;
 }
 
 /** Change the global settings for ImmutableTS. */

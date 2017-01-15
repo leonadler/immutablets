@@ -1,16 +1,10 @@
-import { globalSettings, immutableSymbol, immutableSettings, getSettings, ImmutableSettings } from './immutable-settings';
-import { functionMutatesInput } from './function-mutates-input';
 import { deepClone } from './deep-clone';
-import { MethodNotImmutableError } from './method-not-immutable-error';
 import { flatEqual } from './flat-equal';
+import { functionMutatesInput } from './function-mutates-input';
+import { ClassOf, ImmutableMetadata, ChangeList } from './immutable-interfaces';
+import { globalSettings, immutableSymbol, immutableSettings, getSettings, immutableObserversSymbol } from './immutable-settings';
+import { MethodNotImmutableError } from './method-not-immutable-error';
 
-export type ClassOf<T> = { new(...args: any[]): T, prototype: T };
-
-interface ImmutableMetadata {
-    cloneDepth: number;
-    originalClass: any;
-    settings: ImmutableSettings;
-}
 
 /**
  * Declares a class as immutable.
@@ -43,13 +37,12 @@ interface ImmutableMetadata {
  *         };
  *     }
  */
-function ImmutableDecorator({ depth } = { depth: 0 }): <T, C extends ClassOf<T>>(target: C) => C {
+export function Immutable({ depth } = { depth: 0 }): <T, C extends ClassOf<T>>(target: C) => C {
     return function ImmutableClassDecorator<T, C extends ClassOf<T>>(originalClass: C): C {
         return createImmutableClass(originalClass, { depth });
     };
 }
 
-export { ImmutableDecorator as Immutable };
 
 /**
  * @internal
@@ -60,6 +53,13 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
         for (let key of Object.getOwnPropertyNames(instance)) {
             this[key] = (instance as any)[key];
         }
+
+        Object.defineProperty(this, immutableObserversSymbol, {
+            configurable: true,
+            enumerable: false,
+            writable: false,
+            value: []
+        })
     }
 
     const originalPrototype = originalClass.prototype as any;
@@ -129,17 +129,42 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
             restoreUnchangedProperties(this, originalProperties, metadata.cloneDepth);
         }, args, this);
 
-
         if (mutations) {
             // A method has changed a property without cloning the object first
             throw new MethodNotImmutableError(mutations, originalMethod, originalClass);
+        }
+
+        // Notify all observers added by ObserveChanges
+        const observers = this[immutableObserversSymbol] as ((c: ChangeList<any>) => void)[];
+        if (observers && observers.length > 0) {
+            const changeList: ChangeList<any> = {
+                instance: this,
+                changes: { }
+            };
+
+            let hasChanges = false;
+
+            for (let key of Object.keys(this)) {
+                if (this[key] !== originalProperties[key]) {
+                    hasChanges = true;
+                    changeList.changes[key] = {
+                        oldValue: originalProperties[key],
+                        newValue: this[key]
+                    }
+                }
+            }
+
+            if (hasChanges) {
+                for (let observer of observers) {
+                    observer(changeList);
+                }
+            }
         }
 
         return returnValue;
     };
     return wrapped;
 }
-
 
 /** @internal */
 export function restoreUnchangedProperties<T>(target: T, original: T, depth: number): void;

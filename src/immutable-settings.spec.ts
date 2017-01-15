@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { Immutable } from './immutable-decorator';
-import { ImmutableSettings, immutableSettings, immutableSymbol, getSettings } from './immutable-settings';
+import { ImmutableSettings } from './immutable-interfaces';
+import { immutableSettings, immutableSymbol, getSettings } from './immutable-settings';
 
 
 describe('immutableSettings', () => {

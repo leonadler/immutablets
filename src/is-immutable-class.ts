@@ -1,4 +1,4 @@
-import { ClassOf } from './immutable-decorator';
+import { ClassOf } from './immutable-interfaces';
 import { immutableSymbol } from './immutable-settings';
 
 export function isImmutableClass<T>(target: ClassOf<T>): boolean {
