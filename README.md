@@ -17,13 +17,13 @@ that any input that receives the same value as before was not changed.
 
 ## Getting started
 
-```
+```Bash
 npm install immutablets
 ```
 
 Define your application state as a class decorated with `@Immutable`:
 
-```
+```TypeScript
 import { Immutable } from 'immutablets';
 
 @Immutable()
@@ -44,9 +44,11 @@ class ApplicationState {
 
 Observe the application state for changes:
 
-```
+```TypeScript
 @Component({
-    template: `<file-list [files]="(currentFolder | async)?.files"></file-list>`,
+    template: `
+        <file-list [files]="(currentFolder | async)?.files">
+        </file-list>`,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 class FolderDetailsComponent {
@@ -69,20 +71,21 @@ to write mutation-safe code with plain javascript objects and arrays.
 If any method call changes properties of an existing reference
 instead of creating a new object, a MethodNonImmutableError will be thrown:
 
-```
+```TypeScript
 @Immutable()
 class BadFolderListImplementation {
     private folders: Folder[];
     add(newFolder: Folder) {
         this.folders.push(newFolder);
-        //           ^ push changes the array without changing the "folders" reference.
-        //             MethodNonImmutableError is thrown.
+        //           ^ push changes the array, therefore
+        //             a MethodNonImmutableError is thrown.
     }
 }
 ```
 
 When the method creates a new object instead of changing an existing one, no error is thrown:
-```
+
+```TypeScript
     add(newFolder: Folder) {
         this.folders = [...this.folders, newFolder];
     }
