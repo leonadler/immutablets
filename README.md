@@ -21,7 +21,7 @@ that any input that receives the same value as before was not changed.
 npm install immutablets
 ```
 
-Define application state as a class decorated with @Immutable:
+Define your application state as a class decorated with `@Immutable`:
 
 ```
 import { Immutable } from 'immutablets';
@@ -90,4 +90,4 @@ When the method creates a new object instead of changing an existing one, no err
 
 ## License
 
-(MIT)[LICENSE]
+[MIT](LICENSE)
