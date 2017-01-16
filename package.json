@@ -1,18 +1,9 @@
 {
   "name": "immutablets",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Immutable state management for TypeScript",
-  "main": "index.js",
-  "scripts": {
-    "build": "gulp build",
-    "pretest": "gulp build",
-    "test": "gulp test",
-    "watch": "gulp watch"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/leonadler/immutablets.git"
-  },
+  "author": "Leon Adler <git@leon-adler.com>",
+  "license": "MIT",
   "keywords": [
     "immutable",
     "mutable",
@@ -20,12 +11,22 @@
     "flux",
     "typescript"
   ],
-  "author": "Leon Adler <git@leon-adler.com>",
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonadler/immutablets.git"
+  },
   "bugs": {
     "url": "https://github.com/leonadler/immutablets/issues"
   },
   "homepage": "https://github.com/leonadler/immutablets#readme",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "build": "gulp build",
+    "prepublish": "gulp build",
+    "test": "gulp test",
+    "watch": "gulp watch"
+  },
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/del": "^2.2.31",
