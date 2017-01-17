@@ -1,13 +1,13 @@
 export type ClassOf<T> = { new(...args: any[]): T, prototype: T };
 
 export interface ChangeList<T> {
-    instance: T;
     changes: {
         [K in keyof T]: {
             oldValue: T[K],
             newValue: T[K]
         }
     };
+    instance: T;
 }
 
 /** Settings for the @Immutable decorator. */
