@@ -1,4 +1,4 @@
-import { differs } from './differs';
+import { flatEqual } from './flat-equal';
 
 /** Map the values of an array to new values. When no properties are changed, the passed array is returned. */
 export function map<T>(input: T[], mapping: (value: T, index: number, array: T[]) => T, thisArg?: any): T[];
@@ -20,7 +20,7 @@ export function map<T>(input: T, mapFn: Function, thisArg?: any): T {
             let element = input[index];
             let result = mapFn.call(thisArg, element, index, input);
 
-            if (differs(result, element)) {
+            if (!flatEqual(result, element)) {
                 hasChanged = true;
                 clone[index] = result;
             } else {
@@ -34,7 +34,7 @@ export function map<T>(input: T, mapFn: Function, thisArg?: any): T {
         	let prop = (input as any)[keys[index]];
             let result = mapFn.call(thisArg, prop, keys[index], input);
 
-            if (differs(result, prop)) {
+            if (!flatEqual(result, prop)) {
                 hasChanged = true;
                 clone[keys[index]] = result;
             } else {
