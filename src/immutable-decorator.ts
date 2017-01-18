@@ -4,6 +4,7 @@ import { functionMutatesInput } from './function-mutates-input';
 import { ClassOf, ImmutableMetadata, ChangeList } from './immutable-interfaces';
 import { globalSettings, immutableSymbol, immutableSettings, getSettings, immutableObserversSymbol } from './immutable-settings';
 import { MethodNotImmutableError } from './method-not-immutable-error';
+import { getFunctionName } from './utils';
 
 
 /**
@@ -48,10 +49,11 @@ export function Immutable({ depth } = { depth: 0 }): <T, C extends ClassOf<T>>(t
  * @internal
  */
 export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, { depth }: { depth: number }): C {
-    let mappedClass = function ImmutableClass(...args: any[]) {
+
+    function mappedConstructor(this: T, ...args: any[]) {
         let instance = new originalClass(...args);
-        for (let key of Object.getOwnPropertyNames(instance)) {
-            this[key] = (instance as any)[key];
+        for (let key of Object.getOwnPropertyNames(instance) as (keyof T)[]) {
+            this[key] = instance[key];
         }
 
         Object.defineProperty(this, immutableObserversSymbol, {
@@ -59,9 +61,11 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
             enumerable: false,
             writable: false,
             value: []
-        })
+        });
     }
 
+    const className = getFunctionName(originalClass);
+    const mappedClass = createNamedFunction(className, mappedConstructor);
     const originalPrototype = originalClass.prototype as any;
     const mappedPrototype: any = mappedClass.prototype = Object.create(originalClass.prototype);
 
@@ -104,6 +108,13 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
     }
 
     return mappedClass as any;
+}
+
+/** Creates a new function with the passed name. */
+function createNamedFunction(name: string, realImplementation: (this: any, ...args: any[]) => any): Function {
+    name = name.replace(/[+-.,;()\{\}\[\]]+/g, '_');
+    const creator = new Function('fn', `return function ${name}() { return fn.apply(this, arguments); }`);
+    return creator(realImplementation);
 }
 
 function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetadata): Function {

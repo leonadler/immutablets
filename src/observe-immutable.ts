@@ -1,5 +1,5 @@
 import { immutableSymbol, immutableObserversSymbol } from './immutable-settings';
-import { getFunctionName } from './method-not-immutable-error';
+import { getFunctionName } from './utils';
 import { AnonymousSubscription, ChangeList, ImmutableMetadata, Subscribable } from './immutable-interfaces';
 
 

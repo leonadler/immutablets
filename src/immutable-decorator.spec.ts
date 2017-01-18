@@ -118,6 +118,18 @@ describe('createImmutableClass', () => {
         expect(ExampleClass.prototype).to.respondTo('double');
     });
 
+    it('keeps the name of the original class', () => {
+        @Immutable()
+        class ExampleClass { }
+
+        expect(ExampleClass.name).to.equal('ExampleClass');
+
+        @Immutable()
+        class Fruit { }
+
+        expect(Fruit.name).to.equal('Fruit');
+    });
+
     it('copies properties when a reference is returned by the original constructor', () => {
         let objectToReturn = {
             color: 'red'
