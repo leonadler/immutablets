@@ -2,6 +2,7 @@ export { deepClone } from './deep-clone';
 export { deepEqual } from './deep-equal';
 export { flatEqual } from './flat-equal';
 export { Immutable } from './immutable-decorator';
+import { ChangeList } from './immutable-interfaces';
 export { immutableSettings } from './immutable-settings';
 export { isCyclicStructure } from './is-cyclic-structure';
 export { isImmutableClass } from './is-immutable-class';
