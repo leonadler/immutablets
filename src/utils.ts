@@ -1,3 +1,5 @@
+import { ImmutableMetadata } from './immutable-interfaces';
+
 /** @internal */
 export function getFunctionName(fn: Function): string {
     if (Object.prototype.hasOwnProperty.call(fn, 'name')) {
@@ -32,4 +34,54 @@ export function parseFunctionSource(source: string): { name: string, argNames: s
         .map(arg => arg.replace(/^\s*(\w+)(?: *=.+)?\s*/, '$1'))
         .filter(s => !!s);
     return { name, argNames };
+}
+
+let metadataWeakMap: WeakMap<any, Partial<ImmutableMetadata>>;
+let metadataSymbol = (typeof Symbol === 'function') ? Symbol('immutablets') : '@@immutablets';
+
+/** @internal */
+export function getImmutableMetadata(target: Function): Partial<ImmutableMetadata> | undefined {
+    if (typeof Reflect === 'object' && (Reflect as any).getMetadata) {
+        return (Reflect as any).getMetadata('immutablets', target);
+    } else if (typeof WeakMap === 'function') {
+        if (!metadataWeakMap) {
+            metadataWeakMap = new WeakMap();
+        }
+        do {
+            let metadata = metadataWeakMap.get(target);
+            if (metadata) {
+                return metadata;
+            }
+            target = target.prototype && Object.getPrototypeOf(target.prototype);
+            target = target && target.constructor;
+        } while (target);
+    } else {
+        do {
+            let metadata = (target as any)[metadataSymbol];
+            if (metadata) {
+                return metadata;
+            }
+            target = target.prototype && Object.getPrototypeOf(target.prototype);
+            target = target && target.constructor;
+        } while (target);
+    }
+}
+
+/** @internal */
+export function setImmutableMetadata(target: Function, data: Partial<ImmutableMetadata>): void {
+    if (typeof Reflect === 'object' && (Reflect as any).defineMetadata) {
+        (Reflect as any).defineMetadata('immutablets', data, target);
+    } else if (typeof WeakMap === 'function') {
+        if (!metadataWeakMap) {
+            metadataWeakMap = new WeakMap();
+        }
+        metadataWeakMap.set(target, data);
+    } else {
+        Object.defineProperty(target, metadataSymbol, {
+            configurable: true,
+            enumerable: false,
+            value: metadataSymbol,
+            writable: false
+        });
+    }
 }

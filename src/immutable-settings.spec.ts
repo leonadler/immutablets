@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import { Immutable } from './immutable-decorator';
 import { ImmutableSettings } from './immutable-interfaces';
-import { immutableSettings, immutableSymbol, getSettings } from './immutable-settings';
+import { immutableSettings, getSettings } from './immutable-settings';
+import { getImmutableMetadata } from './utils';
 
 
 describe('immutableSettings', () => {
@@ -30,11 +31,12 @@ describe('immutableSettings', () => {
 
     describe('(class)', () => {
 
-        it('stores the passed settings in a Symbol key', () => {
+        it('stores the passed settings as metadata', () => {
+            @Immutable()
             class TestClass { }
-            (TestClass as any)[immutableSymbol] = {};
+
             immutableSettings(TestClass, { checkMutability: true });
-            expect((TestClass as any)[immutableSymbol]).not.to.be.undefined;
+            expect(getImmutableMetadata(TestClass)).not.to.be.undefined;
         });
 
         it('stores the settings by reference', () => {
@@ -42,9 +44,6 @@ describe('immutableSettings', () => {
             @Immutable()
             class TestClass { }
             immutableSettings(TestClass, settings);
-
-            const symbol = Object.getOwnPropertySymbols(TestClass)[0];
-            expect(symbol).not.to.be.undefined;
 
             const storedSettings = getSettings(TestClass)!;
             settings.checkMutability = true;
@@ -61,9 +60,13 @@ describe('immutableSettings', () => {
 
 describe('getSettings (internal)', () => {
 
-    it('returns the settings stored in a Symbol key', () => {
+    it('returns the settings stored', () => {
+        @Immutable()
+        class TestClass { }
+
         const settings: ImmutableSettings = { checkMutability: true };
-        const target = { [immutableSymbol]: { settings } };
+        immutableSettings(TestClass, settings);
+        const target = new TestClass();
 
         settings.checkMutability = true;
         expect(getSettings(target)!.checkMutability).to.equal(true);

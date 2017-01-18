@@ -4,7 +4,7 @@ import { immutableSettings } from './immutable-settings';
 import { observeImmutable } from './observe-immutable';
 
 
-describe('ObserveChanges', () => {
+describe('observeImmutable', () => {
 
     @Immutable()
     class ImmutableList<T> {

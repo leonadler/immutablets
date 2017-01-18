@@ -1,11 +1,10 @@
 import { ImmutableSettings } from './immutable-interfaces';
-
-
-/** @internal */
-export const immutableSymbol = Symbol('ImmutableSettings');
+import { getImmutableMetadata, setImmutableMetadata } from './utils';
 
 /** @internal */
-export const immutableObserversSymbol = Symbol('ImmutableObservers');
+export const immutableObserversSymbol = typeof Symbol === 'function'
+    ? Symbol('immutable-observers')
+    : '@@immutable-observers';
 
 /** @internal */
 export const globalSettings: ImmutableSettings = {
@@ -15,7 +14,8 @@ export const globalSettings: ImmutableSettings = {
 /** @internal */
 export function getSettings(target?: any): ImmutableSettings | undefined {
     if (target) {
-        return target[immutableSymbol] && target[immutableSymbol].settings || globalSettings;
+        const metadata = getImmutableMetadata(target);
+        return metadata && metadata.settings || globalSettings;
     } else {
         return globalSettings;
     }
@@ -32,10 +32,12 @@ export function immutableSettings(classOrGlobalSettings: any, classSettings?: Im
         // global settings
         const settings = classOrGlobalSettings as ImmutableSettings;
         globalSettings.checkMutability = settings.checkMutability;
-    } else if (classOrGlobalSettings[immutableSymbol] != null) {
-        // class settings
-        classOrGlobalSettings[immutableSymbol].settings = classSettings;
     } else {
-        throw new TypeError('Not an immutable class');
+        const metadata = getImmutableMetadata(classOrGlobalSettings);
+        debugger;
+        if (!metadata) {
+            throw new TypeError('Not an immutable class');
+        }
+        metadata.settings = classSettings;
     }
 }

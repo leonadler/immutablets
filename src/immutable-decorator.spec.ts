@@ -1,8 +1,10 @@
 import { expect } from 'chai';
 import 'reflect-metadata';
+
 import { Immutable, createImmutableClass, restoreUnchangedProperties } from './immutable-decorator';
 import { immutableSettings } from './immutable-settings';
 import { isImmutableClass } from './is-immutable-class';
+import { CloneDepth } from './clone-depth-decorator';
 
 
 describe('Immutable decorator', () => {
@@ -25,7 +27,7 @@ describe('createImmutableClass', () => {
             logout(): void { }
         }
 
-        const OtherClass = createImmutableClass(MyClass, { depth: 0 });
+        const OtherClass = createImmutableClass(MyClass);
 
         expect(OtherClass.prototype.login).to.be.a('function');
         expect(OtherClass.prototype.logout).to.be.a('function');
@@ -131,20 +133,23 @@ describe('createImmutableClass', () => {
         expect(Fruit.name).to.equal('Fruit');
     });
 
-    it('keeps the metadata of the original class', () => {
+    it('keeps the metadata of the original class', function (){
         // Reflect-metadata does this via the prototype chain.
         // This just tests if the behavior stays as expected in the future.
 
-        expect(typeof Reflect).to.equal('object');
-        expect(Reflect.defineMetadata).to.be.a('function');
+        if (typeof Reflect !== 'object' || !('defineMetadata' in Reflect)) {
+            mocha.currentTest.skip('No support for Reflect.defineMetadata');
+            return;
+        }
 
         class ExampleClass { }
-        Reflect.defineMetadata('annotations', ['some annotations'], ExampleClass);
+        (Reflect as any).defineMetadata('annotations', ['some annotations'], ExampleClass);
 
-        const ImmutableClass = createImmutableClass(ExampleClass, { depth: 0 });
-        const savedMetadata = Reflect.getMetadata('annotations', ImmutableClass);
+        const ImmutableClass = createImmutableClass(ExampleClass);
+        const savedMetadata = (Reflect as any).getMetadata('annotations', ImmutableClass);
         expect(savedMetadata).to.deep.equal(['some annotations']);
     });
+
 
     it('copies properties when a reference is returned by the original constructor', () => {
         let objectToReturn = {
@@ -232,7 +237,7 @@ describe('createImmutableClass', () => {
                 getNumber() { return 1; }
             }
 
-            const OneAsImmutable = createImmutableClass(ExampleClassOne, { depth: 0 });
+            const OneAsImmutable = createImmutableClass(ExampleClassOne);
 
             ExampleClassOne.prototype.getNumber = () => 2;
 
@@ -241,7 +246,7 @@ describe('createImmutableClass', () => {
         });
 
         it('throws when an object property is changed non-immutable', () => {
-            @Immutable({ depth: 0 })
+            @Immutable()
             class BadNonImmutableList {
                 list: string[] = [];
                 add(entry: string) {
@@ -254,7 +259,7 @@ describe('createImmutableClass', () => {
         });
 
         it('does not throw when an object property is changed by reference', () => {
-            @Immutable({ depth: 0 })
+            @Immutable()
             class ImmutableList {
                 list: string[] = [];
                 add(entry: string) {
@@ -280,9 +285,11 @@ describe('createImmutableClass', () => {
         });
 
         function keepsReferencesTest() {
-            @Immutable({ depth: 1 })
+            @Immutable()
             class ChangeableCounter {
+                @CloneDepth(1)
                 counter = { currentNumber: 1 };
+
                 setCounterTo(newValue: number) {
                     this.counter.currentNumber = newValue;
                 }

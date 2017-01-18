@@ -1,8 +1,8 @@
-import { ClassOf } from './immutable-interfaces';
-import { immutableSymbol } from './immutable-settings';
+import { getImmutableMetadata } from './utils';
 
-export function isImmutableClass<T>(target: ClassOf<T>): boolean {
+/** Returns true if the argument is a class decorated with @Immutable. */
+export function isImmutableClass(target: Function): boolean {
     return typeof target === 'function'
         && target.prototype !== Function.prototype as any
-        && (target.prototype as any)[immutableSymbol] != undefined;
+        && getImmutableMetadata(target) != undefined;
 }

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Immutable, createImmutableClass } from './immutable-decorator';
 import { isImmutableClass } from './is-immutable-class';
-import { immutableSymbol } from './immutable-settings';
+import { setImmutableMetadata } from './utils';
 
 describe('isImmutableClass', () => {
 
@@ -24,16 +24,16 @@ describe('isImmutableClass', () => {
         expect(isImmutableClass(B)).to.be.false;
     });
 
-    it('returns true for a class with the immutable symbol', () => {
+    it('returns true for a class with immutable metadata', () => {
         class ExampleClass { }
-        (ExampleClass.prototype as any)[immutableSymbol] = { };
+        setImmutableMetadata(ExampleClass, {});
 
         expect(isImmutableClass(ExampleClass)).to.be.true;
     });
 
     it('returns true for a class created with createImmutableClass', () => {
         class ExampleClass { }
-        const otherClass = createImmutableClass(ExampleClass, { depth: 0 });
+        const otherClass = createImmutableClass(ExampleClass);
 
         expect(isImmutableClass(otherClass)).to.be.true;
     });

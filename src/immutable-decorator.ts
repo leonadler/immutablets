@@ -2,9 +2,9 @@ import { deepClone } from './deep-clone';
 import { flatEqual } from './flat-equal';
 import { functionMutatesInput } from './function-mutates-input';
 import { ClassOf, ImmutableMetadata, ChangeList } from './immutable-interfaces';
-import { globalSettings, immutableSymbol, immutableSettings, getSettings, immutableObserversSymbol } from './immutable-settings';
+import { globalSettings,  immutableObserversSymbol } from './immutable-settings';
 import { MethodNotImmutableError } from './method-not-immutable-error';
-import { getFunctionName } from './utils';
+import { getFunctionName, getImmutableMetadata, setImmutableMetadata } from './utils';
 
 
 /**
@@ -38,9 +38,9 @@ import { getFunctionName } from './utils';
  *         };
  *     }
  */
-export function Immutable({ depth } = { depth: 0 }): <T, C extends ClassOf<T>>(target: C) => C {
+export function Immutable(): <T, C extends ClassOf<T>>(target: C) => C {
     return function ImmutableClassDecorator<T, C extends ClassOf<T>>(originalClass: C): C {
-        return createImmutableClass(originalClass, { depth });
+        return createImmutableClass(originalClass);
     };
 }
 
@@ -48,7 +48,7 @@ export function Immutable({ depth } = { depth: 0 }): <T, C extends ClassOf<T>>(t
 /**
  * @internal
  */
-export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, { depth }: { depth: number }): C {
+export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C): C {
 
     function mappedConstructor(this: T, ...args: any[]) {
         let instance = new originalClass(...args);
@@ -66,13 +66,14 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
 
     const className = getFunctionName(originalClass);
     const mappedClass = createNamedFunction(className, mappedConstructor);
+    const originalMetadata = getImmutableMetadata(originalClass);
     const originalPrototype = originalClass.prototype as any;
     const mappedPrototype: any = mappedClass.prototype = Object.create(originalClass.prototype);
 
     const metadata: ImmutableMetadata = {
-        cloneDepth: depth,
+        cloneDepth: originalMetadata && originalMetadata.cloneDepth || {},
         originalClass,
-        settings: globalSettings
+        settings: globalSettings,
     };
 
     // Map methods of the original class
@@ -98,14 +99,8 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C, 
     }
 
     // Define immutable-specific metadata
-    for (let target of [mappedClass, mappedPrototype]) {
-        Object.defineProperty(target, immutableSymbol, {
-            configurable: true,
-            enumerable: false,
-            value: metadata,
-            writable: false
-        });
-    }
+    setImmutableMetadata(mappedClass, metadata);
+    setImmutableMetadata(mappedPrototype, metadata);
 
     return mappedClass as any;
 }
@@ -133,11 +128,13 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
         const mutations = runAndCheckChanges(() => {
             for (let key of Object.keys(this)) {
                 originalProperties[key] = this[key];
-                this[key] = deepClone(this[key], cloneDepth - 1);
+                this[key] = deepClone(this[key], (cloneDepth[key] || 0) - 1);
             }
 
             returnValue = originalMethod.apply(this, args);
-            restoreUnchangedProperties(this, originalProperties, metadata.cloneDepth);
+
+            // Restore unchanged properties
+            restoreUnchangedProperties(this, originalProperties, cloneDepth);
         }, args, this);
 
         if (mutations) {
@@ -178,11 +175,12 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
 }
 
 /** @internal */
-export function restoreUnchangedProperties<T>(target: T, original: T, depth: number): void;
+export function restoreUnchangedProperties<T>(target: T, original: T, depth: number | { [K in keyof T]?: number }): void;
 /** @internal */
-export function restoreUnchangedProperties(target: any, original: any, depth: number): void {
+export function restoreUnchangedProperties(target: any, original: any, depthArg: number | { [k: string]: number }): void {
     for (let key of Object.keys(target)) {
         if (typeof target[key] === 'object') {
+            const depth = typeof depthArg === 'number' ? depthArg : depthArg[key];
             if (depth > 0) {
                 restoreUnchangedProperties(target[key], original[key], depth - 1);
             }

@@ -21,7 +21,7 @@ export interface ImmutableSettings {
 
 /** @internal */
 export interface ImmutableMetadata {
-    cloneDepth: number;
+    cloneDepth: { [propertyKey: string]: number };
     originalClass: any;
     settings: ImmutableSettings;
 }
