@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import 'reflect-metadata';
 import { Immutable, createImmutableClass, restoreUnchangedProperties } from './immutable-decorator';
 import { immutableSettings } from './immutable-settings';
 import { isImmutableClass } from './is-immutable-class';
@@ -128,6 +129,21 @@ describe('createImmutableClass', () => {
         class Fruit { }
 
         expect(Fruit.name).to.equal('Fruit');
+    });
+
+    it('keeps the metadata of the original class', () => {
+        // Reflect-metadata does this via the prototype chain.
+        // This just tests if the behavior stays as expected in the future.
+
+        expect(typeof Reflect).to.equal('object');
+        expect(Reflect.defineMetadata).to.be.a('function');
+
+        class ExampleClass { }
+        Reflect.defineMetadata('annotations', ['some annotations'], ExampleClass);
+
+        const ImmutableClass = createImmutableClass(ExampleClass, { depth: 0 });
+        const savedMetadata = Reflect.getMetadata('annotations', ImmutableClass);
+        expect(savedMetadata).to.deep.equal(['some annotations']);
     });
 
     it('copies properties when a reference is returned by the original constructor', () => {
