@@ -49,6 +49,8 @@ function test() {
         .on('error', function (error: Error) {
             if (error.name === 'TSError') {
                 log(colors.red(error.message));
+            } else if (!/^\s*\d+ tests? failed./.test(error.message)) {
+                log(colors.red(error.toString()));
             }
             process.exitCode = 1;
             this.emit('end');
