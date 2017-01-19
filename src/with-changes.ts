@@ -7,41 +7,18 @@ import { arraySlice, isArray, objectAssign, objectCreate, objectGetPrototypeOf }
 export function withChanges<O extends Object>(original: O, callback: (original: O) => void): O;
 
 /**
- * Clones the provided array and passes it to the provided callback.
- * If any properties are changed in the callback, the clone is returned, the original otherwise.
- */
-export function withChanges<A>(original: A[], callback: (original: A[]) => void): A[];
-
-/**
- * Clones the provided object and passes it to the provided callback.
- * If any properties are changed in the callback, the clone is returned, the original otherwise.
- */
-export function withChanges<O extends Object, T>(original: O, callback: (this: T, original: O) => void, thisArg: T): O;
-
-/**
- * Clones the provided array and passes it to the provided callback.
- * If any properties are changed in the callback, the clone is returned, the original otherwise.
- */
-export function withChanges<A, T>(original: A[], callback: (this: T, original: A[]) => void, thisArg: T): A[];
-
-/**
  * Clones the provided object if any of the properties would change, returns the original otherwise.
  */
 export function withChanges<O extends Object, K extends keyof O>(original: O, assignment: { [P in K]: O[P] }): O;
 
-/*
- * Clones the provided array if any of the properties would change, returns the original otherwise.
- */
-export function withChanges<A>(original: A[], keysToChange: { [key: number]: A }): A[];
 
-
-export function withChanges(original: any, assignment: any, thisArg?: any): any {
+export function withChanges(original: any, assignment: any): any {
     if (typeof assignment === 'function') {
         const clone = isArray(original)
             ? arraySlice(original)
             : objectAssign(objectCreate(objectGetPrototypeOf(original)), original);
 
-        assignment.call(thisArg, clone);
+        assignment.call(undefined, clone);
 
         for (let key in clone) {
             if (original[key] !== clone[key]) {

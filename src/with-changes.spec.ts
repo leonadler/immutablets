@@ -243,36 +243,6 @@ describe('withChanges', () => {
             expect(dogAfraidOfWater).to.be.an.instanceof(Animal);
         });
 
-        it('can be passed a "this" value', () => {
-            const thisObject = { x: 3 };
-
-            function changeFn(obj: { name: string }): void {
-                expect(this).to.equal(thisObject);
-            }
-
-            const original = { name: 'original' };
-            const clone = withChanges(original, changeFn, thisObject);
-        });
-
-    });
-
-    describe('<array, object>', () => {
-
-        it('returns a new array if any element is changed', () => {
-            const original = ['apple', 'banana', 'carrot'];
-            const clone = withChanges(original, { 1: 'orange' });
-            expect(clone).to.be.an('array');
-            expect(clone).not.to.equal(original);
-            expect(clone).to.deep.equal(['apple', 'orange', 'carrot']);
-        });
-
-        it('returns the same array if all elements are equal', () => {
-            const original = ['apple', 'banana', 'carrot'];
-            const clone = withChanges(original, { 1: 'banana' });
-            expect(clone).to.be.an('array');
-            expect(clone).to.equal(original);
-        });
-
     });
 
     describe('<array, function>', () => {
