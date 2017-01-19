@@ -42,11 +42,11 @@ describe('ImmutableStateStore', () => {
     });
 
     it('updates the state when an action changes it', () => {
-        expect(store.state.shoppingCart.items).to.have.length(0);
+        expect(store.state.shoppingCart.items).to.have.lengthOf(0);
         expect(store.state.warehouse.salePercentage).to.equal(0);
 
         store.actions.shoppingCart.addToCart(1234);
-        expect(store.state.shoppingCart.items).to.have.length(1);
+        expect(store.state.shoppingCart.items).to.have.lengthOf(1);
         expect(store.state.warehouse.salePercentage).to.equal(0);
 
         store.actions.warehouse.startSale(7);
@@ -58,7 +58,7 @@ describe('ImmutableStateStore', () => {
         const sub = store.asObservable()
             .subscribe(state => emittedStates.push(state));
 
-        expect(emittedStates).to.have.length(0);
+        expect(emittedStates).to.have.lengthOf(0);
 
         const initialState = store.state;
         expect(initialState).to.deep.equal({
@@ -74,13 +74,13 @@ describe('ImmutableStateStore', () => {
 
         store.actions.shoppingCart.addToCart(1234);
 
-        expect(emittedStates).to.have.length(1);
+        expect(emittedStates).to.have.lengthOf(1);
         expect(emittedStates[0].shoppingCart.items).to.deep.equal([{ sku: 1234, amount: 1 }]);
         expect(emittedStates[0].warehouse).to.equal(initialState.warehouse);
 
         store.actions.warehouse.startSale(3);
 
-        expect(emittedStates).to.have.length(2);
+        expect(emittedStates).to.have.lengthOf(2);
         expect(emittedStates[1].shoppingCart).to.equal(emittedStates[0].shoppingCart);
         expect(emittedStates[1].warehouse).to.deep.equal({
             stockKeepingUnits: {},
@@ -94,36 +94,36 @@ describe('ImmutableStateStore', () => {
         const emittedStates = [] as ApplicationState[];
         const sub = store.asObservable().subscribe(state => emittedStates.push(state));
 
-        expect(emittedStates).to.have.length(0);
+        expect(emittedStates).to.have.lengthOf(0);
 
         store.actions.shoppingCart.addToCart(1234);
-        expect(emittedStates).to.have.length(1);
+        expect(emittedStates).to.have.lengthOf(1);
 
         sub.unsubscribe();
 
         store.actions.shoppingCart.addToCart(7777);
-        expect(emittedStates).to.have.length(1);
+        expect(emittedStates).to.have.lengthOf(1);
 
         store.actions.warehouse.startSale(3);
-        expect(emittedStates).to.have.length(1);
+        expect(emittedStates).to.have.lengthOf(1);
     });
 
     it('does not emit after destroy()', () => {
         const emittedStates = [] as ApplicationState[];
         const sub = store.asObservable().subscribe(state => emittedStates.push(state));
 
-        expect(emittedStates).to.have.length(0);
+        expect(emittedStates).to.have.lengthOf(0);
 
         store.actions.shoppingCart.addToCart(1234);
-        expect(emittedStates).to.have.length(1);
+        expect(emittedStates).to.have.lengthOf(1);
 
         store.destroy();
 
         store.actions.shoppingCart.addToCart(7777);
-        expect(emittedStates).to.have.length(1);
+        expect(emittedStates).to.have.lengthOf(1);
 
         store.actions.warehouse.startSale(3);
-        expect(emittedStates).to.have.length(1);
+        expect(emittedStates).to.have.lengthOf(1);
     });
 
 });

@@ -28,25 +28,25 @@ describe('observeImmutable', () => {
         });
 
         list.add(47);
-        expect(emittedChanges).to.have.length(1);
+        expect(emittedChanges).to.have.lengthOf(1);
         expect(emittedChanges[0]).to.deep.equal({
             items: { oldValue: [], newValue: [47] }
         });
 
         list.add(23);
-        expect(emittedChanges).to.have.length(2);
+        expect(emittedChanges).to.have.lengthOf(2);
         expect(emittedChanges[1]).to.deep.equal({
             items: { oldValue: [47], newValue: [47, 23] }
         });
 
         list.add(3.14);
-        expect(emittedChanges).to.have.length(3);
+        expect(emittedChanges).to.have.lengthOf(3);
         expect(emittedChanges[2]).to.deep.equal({
             items: { oldValue: [47, 23], newValue: [47, 23, 3.14] }
         });
 
         list.remove(23);
-        expect(emittedChanges).to.have.length(4);
+        expect(emittedChanges).to.have.lengthOf(4);
         expect(emittedChanges[3]).to.deep.equal({
             items: { oldValue: [47, 23, 3.14], newValue: [47, 3.14] }
         });
@@ -80,13 +80,13 @@ describe('observeImmutable', () => {
         });
 
         auth.startLogin();
-        expect(emittedChanges).to.have.length(1);
+        expect(emittedChanges).to.have.lengthOf(1);
         expect(emittedChanges[0]).to.deep.equal({
             isLoggingIn: { oldValue: false, newValue: true }
         });
 
         auth.loginSuccess('TestUser');
-        expect(emittedChanges).to.have.length(2);
+        expect(emittedChanges).to.have.lengthOf(2);
         expect(emittedChanges[1]).to.deep.equal({
             isLoggingIn: { oldValue: true, newValue: false },
             isLoggedIn: { oldValue: false, newValue: true },
@@ -106,7 +106,7 @@ describe('observeImmutable', () => {
         });
 
         list.add(47);
-        expect(emittedChanges).to.have.length(1);
+        expect(emittedChanges).to.have.lengthOf(1);
 
         sub.unsubscribe();
 
@@ -114,7 +114,7 @@ describe('observeImmutable', () => {
         list.add(3.14);
         list.remove(23);
 
-        expect(emittedChanges).to.have.length(1);
+        expect(emittedChanges).to.have.lengthOf(1);
     });
 
     it('emits with mutability checks disabled', () => {
@@ -139,13 +139,13 @@ describe('observeImmutable', () => {
         });
 
         counter.countUp();
-        expect(emittedChanges).to.have.length(1);
+        expect(emittedChanges).to.have.lengthOf(1);
         expect(emittedChanges[0]).to.deep.equal({
             currentNumber: { oldValue: 0, newValue: 1 }
         });
 
         counter.countUp();
-        expect(emittedChanges).to.have.length(2);
+        expect(emittedChanges).to.have.lengthOf(2);
         expect(emittedChanges[1]).to.deep.equal({
             currentNumber: { oldValue: 1, newValue: 2 }
         });
