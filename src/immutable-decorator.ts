@@ -28,8 +28,9 @@ let constructing: boolean = false;
  *     }
  *
  * Changing the depth will clone object properties to the depth specified:
- *     @Immutable({ depth: 2 })
+ *     @Immutable()
  *     class Example {
+ *         @CloneDepth(<the depth you want to use>)
  *         state = { list: [{ id: 1, name: 'one' }] };
  *         addToList(item: { id: number, name: string }) {
  *             // with depth 0:
