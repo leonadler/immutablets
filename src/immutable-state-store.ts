@@ -50,7 +50,7 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
     }
 
     /** Should only be used in testing. Use action methods to change the application state. */
-    setStateForTesting(newState: StateType): void {
+    setStateForTesting(newState: Partial<StateType>): void {
         const changeList: ChangeList = {
             instance: undefined,
             changes: {}
