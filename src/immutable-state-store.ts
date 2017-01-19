@@ -49,6 +49,23 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
         };
     }
 
+    /** Should only be used in testing. Use action methods to change the application state. */
+    setStateForTesting(newState: StateType): void {
+        const changeList: ChangeList = {
+            instance: undefined,
+            changes: {}
+        };
+
+        for (let key of objectKeys(newState)) {
+            changeList.changes[key] = {
+                oldValue: this.currentState && (this.currentState as any)[key],
+                newValue: (newState as any)[key]
+            };
+        }
+
+        this.propertiesChanged(changeList);
+    }
+
     private combineInitialState(): void {
         // Combine initial state properties of all branches into one object.
         const initialState = {} as any;
