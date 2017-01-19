@@ -1,8 +1,8 @@
-# ImmutableTS
+# Immutable, Observable, performant typed structures for TypeScript.
 
-Immutable, Observable, performant typed structures for TypeScript.
+[![npm version](https://badge.fury.io/js/immutablets.svg)](https://www.npmjs.com/package/immutablets)
 
-Designed for use with rxjs observables in angular2 projects - but works without dependencies.
+Designed for use with rxjs observables and angular2, but works without dependencies.
 
 
 ## What is an immutable application state?
