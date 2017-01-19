@@ -7,6 +7,8 @@ import { MethodNotImmutableError } from './method-not-immutable-error';
 import { getFunctionName, getImmutableMetadata, setImmutableMetadata } from './utils';
 
 
+let constructing: boolean = false;
+
 /**
  * Declares a class as immutable.
  * This creates a clone of object to a specified depth when a method is called.
@@ -51,7 +53,9 @@ export function Immutable(): <T, C extends ClassOf<T>>(target: C) => C {
 export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C): C {
 
     function mappedConstructor(this: T, ...args: any[]) {
+        constructing = true;
         let instance = new originalClass(...args);
+        constructing = false;
 
         for (let key of Object.getOwnPropertyNames(instance) as (keyof T)[]) {
             let descriptor = Object.getOwnPropertyDescriptor(instance, key);
@@ -193,4 +197,9 @@ export function restoreUnchangedProperties(target: any, original: any, depthArg:
             }
         }
     }
+}
+
+/** @internal */
+export function isConstructingImmutable(): boolean {
+    return constructing;
 }

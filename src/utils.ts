@@ -99,3 +99,8 @@ export function setImmutableMetadata(target: Function, data: Partial<ImmutableMe
         });
     }
 }
+
+/**
+ * @internal Short-hand method for Object.hasOwnProperty().
+ */
+export const hasOwnProperty: (obj: any, prop: string) => obj is typeof obj & { [prop]: any } = Function.call.bind(Object.prototype.hasOwnProperty);
