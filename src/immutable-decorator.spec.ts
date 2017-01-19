@@ -105,6 +105,21 @@ describe('createImmutableClass', () => {
         expect(returned).to.haveOwnProperty('getPI');
     });
 
+    it('does not change propertiy descriptors of own properties', () => {
+        @Immutable()
+        class ExampleClass {
+            constructor() {
+                Object.defineProperty(this, 'someProp', { enumerable: false, value: 1 });
+            }
+        }
+
+        const instance = new ExampleClass();
+        const descriptor = Object.getOwnPropertyDescriptor(instance, 'someProp');
+        expect(descriptor).not.to.be.undefined;
+        expect(descriptor.enumerable).to.be.false;
+        expect(descriptor.value).to.equal(1);
+    });
+
     it('keeps methods in the prototype', () => {
         let objectToReturn = {};
 
@@ -133,9 +148,9 @@ describe('createImmutableClass', () => {
         expect(Fruit.name).to.equal('Fruit');
     });
 
-    it('keeps the metadata of the original class', function (){
+    it('keeps the metadata of the original class', () => {
         // Reflect-metadata does this via the prototype chain.
-        // This just tests if the behavior stays as expected in the future.
+        // This tests if the behavior stays as expected in the future.
 
         if (typeof Reflect !== 'object' || !('defineMetadata' in Reflect)) {
             mocha.currentTest.skip('No support for Reflect.defineMetadata');
@@ -149,7 +164,6 @@ describe('createImmutableClass', () => {
         const savedMetadata = (Reflect as any).getMetadata('annotations', ImmutableClass);
         expect(savedMetadata).to.deep.equal(['some annotations']);
     });
-
 
     it('copies properties when a reference is returned by the original constructor', () => {
         let objectToReturn = {

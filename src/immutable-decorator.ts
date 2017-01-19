@@ -52,8 +52,10 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
 
     function mappedConstructor(this: T, ...args: any[]) {
         let instance = new originalClass(...args);
+
         for (let key of Object.getOwnPropertyNames(instance) as (keyof T)[]) {
-            this[key] = instance[key];
+            let descriptor = Object.getOwnPropertyDescriptor(instance, key);
+            Object.defineProperty(this, key, descriptor);
         }
 
         Object.defineProperty(this, immutableObserversSymbol, {
