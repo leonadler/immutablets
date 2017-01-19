@@ -1,6 +1,6 @@
-import { getFunctionName } from './utils';
 import { AnonymousSubscription, ChangeList, ImmutableMetadata, Subscribable } from './immutable-interfaces';
 import { immutableObserversSymbol } from './immutable-settings';
+import { getFunctionName, objectGetPrototypeOf } from './utils';
 
 
 /**
@@ -18,7 +18,7 @@ export function observeImmutable<T>(instance: T): Subscribable<ChangeList>;
 export function observeImmutable<T>(instance: T, observableClass?: any): Subscribable<ChangeList> {
     const observers = (instance as any)[immutableObserversSymbol] as ((changeList: ChangeList) => void)[];
     if (!observers) {
-        const constructor = Object.getPrototypeOf(instance).constructor;
+        const constructor = objectGetPrototypeOf(instance).constructor;
         const className = constructor && getFunctionName(constructor) || 'object class';
         throw new Error(className + ' is not decorated as @Immutable.');
     }

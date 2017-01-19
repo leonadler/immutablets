@@ -1,3 +1,5 @@
+import { isArray, objectKeys } from './utils';
+
 /**
  * Returns true if the passed object contains any object reference more than once.
  */
@@ -17,14 +19,14 @@ function hasSharedRefs(object: Array<any> | any, traversed: any[]): boolean {
 
     traversed.push(object);
 
-    if (Array.isArray(object)) {
+    if (isArray(object)) {
         for (let value of object) {
             if (typeof value === 'object' && value != null && hasSharedRefs(value, traversed)) {
                 return true;
             }
         }
     } else {
-        for (let key of Object.keys(object)) {
+        for (let key of objectKeys(object)) {
             if (typeof object[key] === 'object' && object[key] != null && hasSharedRefs(object[key], traversed)) {
                 return true;
             }

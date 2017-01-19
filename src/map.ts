@@ -1,4 +1,5 @@
 import { flatEqual } from './flat-equal';
+import { arraySlice, isArray, objectCreate, objectGetPrototypeOf, objectAssign, objectKeys } from './utils';
 
 /** Map the values of an array to new values. When no properties are changed, the passed array is returned. */
 export function map<T>(input: T[], mapping: (value: T, index: number, array: T[]) => T, thisArg?: any): T[];
@@ -13,8 +14,8 @@ export function map<T>(input: T, mapFn: Function, thisArg?: any): T {
 	let hasChanged = false;
 	let clone: any;
 
-	if (Array.isArray(input)) {
-        clone = Array.prototype.slice.call(input);
+	if (isArray(input)) {
+        clone = arraySlice(input);
         let length = input.length;
         for (let index = 0; index < length; index++) {
             let element = input[index];
@@ -28,8 +29,8 @@ export function map<T>(input: T, mapFn: Function, thisArg?: any): T {
             }
         }
     } else {
-        clone = Object.assign(Object.create(Object.getPrototypeOf(input)), input);
-        let keys = Object.keys(input);
+        clone = objectAssign(objectCreate(objectGetPrototypeOf(input)), input);
+        let keys = objectKeys(input);
         for (let index = 0; index < keys.length; index++) {
         	let prop = (input as any)[keys[index]];
             let result = mapFn.call(thisArg, prop, keys[index], input);

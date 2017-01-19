@@ -1,5 +1,6 @@
 import { InputMutations } from './function-mutates-input';
-import { getFunctionName, getFunctionArgs } from './utils';
+import { getFunctionName, getFunctionArgs, isArray, objectDefineProperty, objectKeys } from './utils';
+
 
 const paddingWhitespace = '                                ';
 
@@ -31,14 +32,14 @@ export class MethodNotImmutableError extends Error {
             Object.setPrototypeOf(this, MethodNotImmutableError.prototype);
         }
 
-        Object.defineProperty(this, 'name', {
+        objectDefineProperty(this, 'name', {
             configurable: true,
             value: 'MethodNotImmutableError',
             writable: true
         });
 
         const argNames = getFunctionArgs(originalMethod);
-        Object.defineProperty(this, 'diff', {
+        objectDefineProperty(this, 'diff', {
             configurable: true,
             value: createMutationDiff(mutations, argNames),
             writable: false
@@ -64,7 +65,7 @@ function createMutationDiff(mutations: InputMutations, argNames: string[]): stri
             path: 'this' + pathToString(prop.path)
         }))
         .concat(
-            ...Object.keys(mutations.args)
+            ...objectKeys(mutations.args)
                 .map(index => mutations.args[+index]
                     .map(prop => ({
                         prop,
@@ -138,7 +139,7 @@ function formatJsValue(value: any): string {
         return JSON.stringify(value);
     } else if (value === null) {
         return 'null';
-    } else if (Array.isArray(value)) {
+    } else if (isArray(value)) {
         return '[' + value.map(el => formatJsValue(el)).join(',') + ']';
     } else if (type === 'function') {
         return 'function';

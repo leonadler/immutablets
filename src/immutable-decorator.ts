@@ -4,7 +4,8 @@ import { functionMutatesInput } from './function-mutates-input';
 import { ClassOf, ImmutableMetadata, ChangeList } from './immutable-interfaces';
 import { globalSettings,  immutableObserversSymbol } from './immutable-settings';
 import { MethodNotImmutableError } from './method-not-immutable-error';
-import { getFunctionName, getImmutableMetadata, setImmutableMetadata } from './utils';
+import { getFunctionName, getImmutableMetadata, hasOwnProperty, objectCreate, objectDefineProperty,
+    objectKeys, setImmutableMetadata } from './utils';
 
 
 let constructing: boolean = false;
@@ -59,10 +60,10 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
 
         for (let key of Object.getOwnPropertyNames(instance) as (keyof T)[]) {
             let descriptor = Object.getOwnPropertyDescriptor(instance, key);
-            Object.defineProperty(this, key, descriptor);
+            objectDefineProperty(this, key, descriptor);
         }
 
-        Object.defineProperty(this, immutableObserversSymbol, {
+        objectDefineProperty(this, immutableObserversSymbol, {
             configurable: true,
             enumerable: false,
             writable: false,
@@ -74,7 +75,7 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
     const mappedClass = createNamedFunction(className, mappedConstructor);
     const originalMetadata = getImmutableMetadata(originalClass);
     const originalPrototype = originalClass.prototype as any;
-    const mappedPrototype: any = mappedClass.prototype = Object.create(originalClass.prototype);
+    const mappedPrototype: any = mappedClass.prototype = objectCreate(originalClass.prototype);
 
     const metadata: ImmutableMetadata = {
         cloneDepth: originalMetadata && originalMetadata.cloneDepth || {},
@@ -90,7 +91,7 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
         }
     }
 
-    Object.defineProperty(mappedPrototype, 'constructor', {
+    objectDefineProperty(mappedPrototype, 'constructor', {
         configurable: true,
         enumerable: false,
         value: mappedClass,
@@ -99,8 +100,8 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
 
     // Copy static methods and properties
     for (let staticKey of Object.getOwnPropertyNames(originalClass)) {
-        if (!Object.prototype.hasOwnProperty.call(mappedClass, staticKey)) {
-            Object.defineProperty(mappedClass, staticKey, Object.getOwnPropertyDescriptor(originalClass, staticKey));
+        if (!hasOwnProperty(mappedClass, staticKey)) {
+            objectDefineProperty(mappedClass, staticKey, Object.getOwnPropertyDescriptor(originalClass, staticKey));
         }
     }
 
@@ -132,7 +133,7 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
             : ((callback: Function) => { callback(); return false; }) as typeof functionMutatesInput;
 
         const mutations = runAndCheckChanges(() => {
-            for (let key of Object.keys(this)) {
+            for (let key of objectKeys(this)) {
                 originalProperties[key] = this[key];
                 this[key] = deepClone(this[key], (cloneDepth[key] || 0) - 1);
             }
@@ -159,7 +160,7 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
 
             let hasChanges = false;
 
-            for (let key of Object.keys(this)) {
+            for (let key of objectKeys(this)) {
                 if (this[key] !== originalProperties[key]) {
                     hasChanges = true;
                     changeList.changes[key] = {
@@ -185,7 +186,7 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
 export function restoreUnchangedProperties<T>(target: T, original: T, depth: number | { [K in keyof T]?: number }): void;
 /** @internal */
 export function restoreUnchangedProperties(target: any, original: any, depthArg: number | { [k: string]: number }): void {
-    for (let key of Object.keys(target)) {
+    for (let key of objectKeys(target)) {
         if (typeof target[key] === 'object') {
             const depth = typeof depthArg === 'number' ? depthArg : depthArg[key];
             if (depth > 0) {

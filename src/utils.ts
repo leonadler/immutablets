@@ -2,7 +2,7 @@ import { ImmutableMetadata } from './immutable-interfaces';
 
 /** @internal */
 export function getFunctionName(fn: Function, prototype?: any): string {
-    if (Object.prototype.hasOwnProperty.call(fn, 'name') && fn.name) {
+    if (hasOwnProperty(fn, 'name') && fn.name) {
         return fn.name;
     }
 
@@ -18,7 +18,7 @@ export function getFunctionName(fn: Function, prototype?: any): string {
                 return name;
             }
         }
-        prototype = Object.getPrototypeOf(prototype);
+        prototype = objectGetPrototypeOf(prototype);
     }
 
     return '';
@@ -66,7 +66,7 @@ export function getImmutableMetadata(target: Function): Partial<ImmutableMetadat
             if (metadata) {
                 return metadata;
             }
-            target = target.prototype && Object.getPrototypeOf(target.prototype);
+            target = target.prototype && objectGetPrototypeOf(target.prototype);
             target = target && target.constructor;
         } while (target);
     } else {
@@ -75,7 +75,7 @@ export function getImmutableMetadata(target: Function): Partial<ImmutableMetadat
             if (metadata) {
                 return metadata;
             }
-            target = target.prototype && Object.getPrototypeOf(target.prototype);
+            target = target.prototype && objectGetPrototypeOf(target.prototype);
             target = target && target.constructor;
         } while (target);
     }
@@ -100,7 +100,26 @@ export function setImmutableMetadata(target: Function, data: Partial<ImmutableMe
     }
 }
 
-/**
- * @internal Short-hand method for Object.hasOwnProperty().
- */
+/** @internal Short-hand method for Array.prototype.slice(). */
+export const arraySlice: <T>(arr: T[]) => T[] = Function.prototype.call.bind(Array.prototype.slice);
+
+/** @internal Short-hand method for Object.hasOwnProperty(). */
 export const hasOwnProperty: (obj: any, prop: string) => obj is typeof obj & { [prop]: any } = Function.call.bind(Object.prototype.hasOwnProperty);
+
+/** @internal Short-hand method for Array.isArray(). */
+export const isArray = Array.isArray;
+
+/** @internal Short-hand method for Object.keys(). */
+export const objectKeys = Object.keys;
+
+/** @internal Short-hand method for Object.assign(). */
+export const objectAssign = Object.assign;
+
+/** @internal Short-hand method for Object.assign(). */
+export const objectCreate = Object.create;
+
+/** @internal Short-hand method for Object.defineProperty(). */
+export const objectDefineProperty = Object.defineProperty;
+
+/** @internal Short-hand method for Object.getPrototypeOf(). */
+export const objectGetPrototypeOf = Object.getPrototypeOf;

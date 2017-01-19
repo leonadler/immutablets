@@ -1,3 +1,5 @@
+import { arraySlice, isArray, objectAssign, objectCreate, objectGetPrototypeOf } from './utils';
+
 /**
  * Clones the provided object and passes it to the provided callback.
  * If any properties are changed in the callback, the clone is returned, the original otherwise.
@@ -35,9 +37,9 @@ export function withChanges<A>(original: A[], keysToChange: { [key: number]: A }
 
 export function withChanges(original: any, assignment: any, thisArg?: any): any {
     if (typeof assignment === 'function') {
-        const clone = Array.isArray(original)
-            ? Array.prototype.slice.apply(original)
-            : Object.assign(Object.create(Object.getPrototypeOf(original)), original);
+        const clone = isArray(original)
+            ? arraySlice(original)
+            : objectAssign(objectCreate(objectGetPrototypeOf(original)), original);
 
         assignment.call(thisArg, clone);
 
@@ -49,10 +51,10 @@ export function withChanges(original: any, assignment: any, thisArg?: any): any 
     } else {
         for (let key in assignment) {
             if (original[key] !== assignment[key]) {
-                if (Array.isArray(original)) {
-                    return Object.assign(Array.prototype.slice.apply(original), assignment);
+                if (isArray(original)) {
+                    return objectAssign(arraySlice(original), assignment);
                 } else {
-                    return Object.assign(Object.create(Object.getPrototypeOf(original)), original, assignment);
+                    return objectAssign(objectCreate(objectGetPrototypeOf(original)), original, assignment);
                 }
             }
         }

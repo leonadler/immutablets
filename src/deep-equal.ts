@@ -1,3 +1,5 @@
+import { isArray, objectGetPrototypeOf, objectKeys } from './utils';
+
 /**
  * Deep-compare two values.
  *
@@ -20,8 +22,8 @@ export function deepEqual(a: any, b: any): boolean {
     }
 
     if (typeof a === 'object') {
-        const arrayA = Array.isArray(a);
-        const arrayB = Array.isArray(b);
+        const arrayA = isArray(a);
+        const arrayB = isArray(b);
 
         if (arrayA !== arrayB) {
             return false;
@@ -41,8 +43,8 @@ export function deepEqual(a: any, b: any): boolean {
             return true;
         } else {
             // Object
-            const protoA = Object.getPrototypeOf(a);
-            const protoB = Object.getPrototypeOf(b);
+            const protoA = objectGetPrototypeOf(a);
+            const protoB = objectGetPrototypeOf(b);
             if (protoA !== protoB) {
                 return false;
             } else if (protoA === Date.prototype) {
@@ -52,8 +54,8 @@ export function deepEqual(a: any, b: any): boolean {
             }
 
             // Plain object or custom prototype
-            const keysA = Object.keys(a).sort();
-            const keysB = Object.keys(b).sort();
+            const keysA = objectKeys(a).sort();
+            const keysB = objectKeys(b).sort();
             if (keysA.length !== keysB.length) {
                 return false;
             }

@@ -1,3 +1,5 @@
+import { isArray, objectKeys } from './utils';
+
 /**
  * Returns true if the passed object contains any object reference that contains itself as a child property.
  * If the function returns false, the passed object can be traversed recursively without causing an infinite loop.
@@ -22,14 +24,14 @@ function isCyclic(object: Array<any> | any, parents: any[], traversed: any[]): b
     traversed.push(object);
     parents = [...parents, object];
 
-    if (Array.isArray(object)) {
+    if (isArray(object)) {
         for (let value of object) {
             if (typeof value === 'object' && value != null && isCyclic(value, parents, traversed)) {
                 return true;
             }
         }
     } else {
-        for (let key of Object.keys(object)) {
+        for (let key of objectKeys(object)) {
             if (typeof object[key] === 'object' && object[key] != null && isCyclic(object[key], parents, traversed)) {
                 return true;
             }

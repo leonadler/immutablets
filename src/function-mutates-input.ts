@@ -1,6 +1,7 @@
 import { deepClone } from './deep-clone';
 import { deepEqual } from './deep-equal';
 import { traverseObject } from './traverse-object';
+import { objectAssign, objectKeys } from './utils';
 
 export interface ChangedProperty {
     path: string[];
@@ -29,7 +30,7 @@ export function functionMutatesInput(fn: Function, args: any[], thisArg: any = u
         }
     });
 
-    if (thisChanges.length > 0 || Object.keys(argChanges).length > 0) {
+    if (thisChanges.length > 0 || objectKeys(argChanges).length > 0) {
         return {
             args: argChanges,
             this: thisChanges
@@ -44,7 +45,7 @@ type Snapshot = Map<any, { value: any, path: string[] }>;
 function createSnapshot(object: any): Snapshot {
     const map = new Map();
     traverseObject(object, (prop, path) => {
-        map.set(prop, { value: Object.assign({}, prop), path });
+        map.set(prop, { value: objectAssign({}, prop), path });
     });
     return map;
 }
@@ -52,8 +53,8 @@ function createSnapshot(object: any): Snapshot {
 function checkSnapshotChanges(snapshotMap: Snapshot): ChangedProperty[] {
     const changes = [] as ChangedProperty[];
     snapshotMap.forEach((snapshot, object) => {
-        const newKeys = Object.keys(object);
-        const oldKeys = Object.keys(snapshot.value);
+        const newKeys = objectKeys(object);
+        const oldKeys = objectKeys(snapshot.value);
 
         for (let key of oldKeys.filter(k => newKeys.indexOf(k) < 0)) {
             changes.push({

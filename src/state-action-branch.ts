@@ -1,6 +1,6 @@
 import { isConstructingImmutable } from './immutable-decorator';
 import { isImmutableClass } from './is-immutable-class';
-import { getFunctionName, getImmutableMetadata } from './utils';
+import { getFunctionName, getImmutableMetadata, isArray, objectDefineProperty, objectGetPrototypeOf } from './utils';
 
 /**
  * Abstract base class for state action branches of an {@link ImmutableStateStore}.
@@ -13,7 +13,7 @@ export abstract class StateActionBranch<StateType> {
             initialState: { [Branch in keyof StateType]?: StateType[Branch] | undefined }
         }) {
 
-        const prototype = Object.getPrototypeOf(this);
+        const prototype = objectGetPrototypeOf(this);
         if (prototype === StateActionBranch.prototype) {
             throw new TypeError('StateActionBranch must be derived in a new class.');
         }
@@ -22,9 +22,9 @@ export abstract class StateActionBranch<StateType> {
             throw new TypeError(getFunctionName(prototype.constructor) + ' inherits StateActionBranch but is not marked as Immutable.');
         }
 
-        let usedKeys: (keyof StateType)[] = Array.isArray(uses) ? uses : [uses];
+        let usedKeys: (keyof StateType)[] = isArray(uses) ? uses : [uses];
         for (let key of usedKeys) {
-            Object.defineProperty(this, key, {
+            objectDefineProperty(this, key, {
                 configurable: true,
                 enumerable: true,
                 writable: true,
@@ -32,7 +32,7 @@ export abstract class StateActionBranch<StateType> {
             });
         }
 
-        Object.defineProperty(this, 'initialState', {
+        objectDefineProperty(this, 'initialState', {
             configurable: false,
             enumerable: false,
             writable: false,

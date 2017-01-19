@@ -1,7 +1,7 @@
 import { AnonymousSubscription, Subscribable, ChangeList, PartialObserver } from './immutable-interfaces';
 import { StateActionBranch } from './state-action-branch';
 import { observeImmutable } from './observe-immutable';
-import { hasOwnProperty } from './utils';
+import { hasOwnProperty, objectKeys } from './utils';
 
 /**
  * Implements an observable store with separate state action branches.
@@ -55,7 +55,7 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
 
         for (let branchName in this.actions) {
             const actionBranch: any = this.actions[branchName];
-            for (let propKey of Object.keys(actionBranch)) {
+            for (let propKey of objectKeys(actionBranch)) {
                 if (actionBranch[propKey] !== undefined || !(propKey in initialState)) {
                     initialState[propKey] = actionBranch[propKey];
                 }
@@ -67,7 +67,7 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
         // Apply initial state to all action branches
         for (let branchName in this.actions) {
             const actionBranch: any = this.actions[branchName];
-            for (let propKey of Object.keys(actionBranch)) {
+            for (let propKey of objectKeys(actionBranch)) {
                 actionBranch[propKey] = initialState[propKey]
             }
         }

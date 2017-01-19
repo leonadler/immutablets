@@ -1,3 +1,5 @@
+import { isArray, objectCreate, objectKeys, objectGetPrototypeOf } from './utils';
+
 declare var Node: any;
 
 /**
@@ -17,13 +19,13 @@ export function deepClone<T>(original: T, depth?: number): T;
 export function deepClone(original: any, depth: number = Number.POSITIVE_INFINITY): any {
     if (!original || depth < 0) {
         return original;
-    } else if (Array.isArray(original)) {
+    } else if (isArray(original)) {
         return original.map(val => deepClone(val, depth - 1));
     }
 
     const typeofOriginal = typeof original;
     if (typeofOriginal === 'object') {
-        const prototype = Object.getPrototypeOf(original);
+        const prototype = objectGetPrototypeOf(original);
 
         if (prototype === RegExp.prototype) {
             return new RegExp(original);
@@ -37,7 +39,7 @@ export function deepClone(original: any, depth: number = Number.POSITIVE_INFINIT
             return original.cloneNode(true);
         }
 
-        const clone = Object.create(prototype);
+        const clone = objectCreate(prototype);
         return clonePropsTo(clone, original, depth);
     } else if (typeofOriginal === 'function') {
         const clone: any = function() {
@@ -50,7 +52,7 @@ export function deepClone(original: any, depth: number = Number.POSITIVE_INFINIT
 }
 
 function clonePropsTo(target: any, source: any, depth: number): any {
-    for (let key of Object.keys(source)) {
+    for (let key of objectKeys(source)) {
         target[key] = deepClone(source[key], depth - 1);
     }
     return target;
