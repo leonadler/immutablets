@@ -143,9 +143,10 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
         }
 
         // Notify all observers added by ObserveChanges
-        const observers = this[immutableObserversSymbol] as ((c: ChangeList<any>) => void)[];
+        const observers = this[immutableObserversSymbol] as ((c: ChangeList) => void)[];
+
         if (observers && observers.length > 0) {
-            const changeList: ChangeList<any> = {
+            const changeList: ChangeList = {
                 instance: this,
                 changes: { }
             };

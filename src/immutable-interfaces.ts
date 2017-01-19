@@ -1,14 +1,27 @@
 export type ClassOf<T> = { new(...args: any[]): T, prototype: T };
 
-export interface ChangeList<T> {
+/** Property changes as returned by observeImmutable(). */
+export interface TypedChangeList<T> {
     changes: {
-        [K in keyof T]: {
+        [K in keyof T]?: {
             oldValue: T[K],
             newValue: T[K]
         }
     };
     instance: T;
 }
+
+/** Property changes as returned by observeImmutable(). */
+export interface ChangeList {
+    changes: {
+        [key: string]: {
+            oldValue: any,
+            newValue: any
+        }
+    };
+    instance: any;
+}
+
 
 /** Settings for the @Immutable decorator. */
 export interface ImmutableSettings {
@@ -30,12 +43,14 @@ export interface ImmutableMetadata {
 export interface AnonymousSubscription {
     unsubscribe(): void;
 }
+
 export interface PartialObserver<T> {
     isUnsubscribed?: boolean;
     next?: (value: T) => void;
     error?: (err: any) => void;
     complete?: () => void;
 }
+
 /** Subscribable interface from rxjs 5 */
 export interface Subscribable<T> {
     subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void), error?: (error: any) => void, complete?: () => void): AnonymousSubscription;
