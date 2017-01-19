@@ -51,7 +51,7 @@ function createSnapshot(object: any): Snapshot {
 
 function checkSnapshotChanges(snapshotMap: Snapshot): ChangedProperty[] {
     const changes = [] as ChangedProperty[];
-    for (let [object, snapshot] of snapshotMap) {
+    snapshotMap.forEach((snapshot, object) => {
         const newKeys = Object.keys(object);
         const oldKeys = Object.keys(snapshot.value);
 
@@ -78,7 +78,7 @@ function checkSnapshotChanges(snapshotMap: Snapshot): ChangedProperty[] {
                 })
             }
         }
-    }
+    });
 
     return changes;
 }

@@ -17,13 +17,19 @@ export class MethodNotImmutableError extends Error {
                 originalConstructor?: Function, methodName?: string) {
 
         if (!methodName) {
-            methodName = getFunctionName(originalMethod);
+            const prototype = originalConstructor && originalConstructor.prototype || undefined;
+            methodName = getFunctionName(originalMethod, prototype);
         }
 
         const className = originalConstructor && getFunctionName(originalConstructor);
         const message = (className ? className + '.' : '') + methodName + ' mutates properties.';
 
         super(message);
+
+        // Fix for TypeScript when emitting to { target: "es5" }
+        if (!(this instanceof MethodNotImmutableError)) {
+            Object.setPrototypeOf(this, MethodNotImmutableError.prototype);
+        }
 
         Object.defineProperty(this, 'name', {
             configurable: true,

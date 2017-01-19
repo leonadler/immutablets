@@ -1,5 +1,26 @@
 import { expect } from 'chai';
-import { parseFunctionSource } from './utils';
+import { getFunctionName, parseFunctionSource } from './utils';
+
+
+describe('getFunctionName (internal)', () => {
+
+    it('can get the name of a compiled method', () => {
+        function FakeClass() {
+            this.x = 5;
+            this.y = 7;
+        }
+        FakeClass.prototype.doubleCoords = function () {
+            this.x *= 2;
+            this.y *= 2;
+        };
+        FakeClass.prototype.constructor = FakeClass;
+
+        let instance = new (FakeClass as any)();
+        let name = getFunctionName(instance.doubleCoords, FakeClass.prototype);
+        expect(name).to.equal('doubleCoords');
+    });
+
+});
 
 describe('parseFunctionSource (internal)', () => {
 

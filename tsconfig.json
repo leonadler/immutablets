@@ -5,6 +5,14 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
+        "lib": [
+            "es5",
+            "es2015.core",
+            "es2015.collection",
+            "es2015.promise",
+            "es2015.reflect",
+            "es2015.symbol"
+        ],
         "module": "commonjs",
         "moduleResolution": "node",
         "noEmitOnError": true,
@@ -13,7 +21,7 @@
         "sourceMap": true,
         "strictNullChecks": true,
         "stripInternal": true,
-        "target": "es6"
+        "target": "es5"
     },
     "exclude": [
         "dist",

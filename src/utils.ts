@@ -1,13 +1,27 @@
 import { ImmutableMetadata } from './immutable-interfaces';
 
 /** @internal */
-export function getFunctionName(fn: Function): string {
-    if (Object.prototype.hasOwnProperty.call(fn, 'name')) {
+export function getFunctionName(fn: Function, prototype?: any): string {
+    if (Object.prototype.hasOwnProperty.call(fn, 'name') && fn.name) {
         return fn.name;
     }
 
     const source = Function.prototype.toString.apply(fn);
-    return parseFunctionSource(source).name;
+    let name = parseFunctionSource(source).name;
+    if (name) {
+        return name;
+    }
+
+    while (prototype) {
+        for (let name of Object.getOwnPropertyNames(prototype)) {
+            if (prototype[name] === fn) {
+                return name;
+            }
+        }
+        prototype = Object.getPrototypeOf(prototype);
+    }
+
+    return '';
 }
 
 /** @internal */
