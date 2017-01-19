@@ -1,6 +1,6 @@
 {
   "name": "immutablets",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Immutable state management for TypeScript",
   "author": "Leon Adler <git@leon-adler.com>",
   "license": "MIT",
