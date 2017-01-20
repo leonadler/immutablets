@@ -24,7 +24,8 @@
   "scripts": {
     "build": "gulp build",
     "prepublish": "gulp build",
-    "test": "gulp test",
+    "test": "mocha --require ts-node/register --require source-map-support/register src/**/*.spec.ts",
+    "watch-tests": "mocha --watch --reporter min --require ts-node/register --require source-map-support/register src/**/*.spec.ts",
     "watch": "gulp watch"
   },
   "devDependencies": {
