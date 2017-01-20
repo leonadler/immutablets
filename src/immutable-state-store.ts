@@ -49,6 +49,27 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
         };
     }
 
+    /** Fully replace the application state (e.g. for undo/redo) */
+    replaceState(newState: StateType): void {
+        const changeList: ChangeList = {
+            instance: undefined,
+            changes: {}
+        };
+
+        for (let key of objectKeys(newState)) {
+            if ((this.currentState as any)[key] !== (newState as any)[key]) {
+                changeList.changes[key] = {
+                    oldValue: (this.currentState as any)[key],
+                    newValue: (newState as any)[key]
+                };
+            }
+        }
+
+        if (Object.keys(changeList.changes).length > 0) {
+            this.propertiesChanged(changeList);
+        }
+    }
+
     /** Should only be used in testing. Use action methods to change the application state. */
     setStateForTesting(newState: Partial<StateType>): void {
         const changeList: ChangeList = {
@@ -58,7 +79,7 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
 
         for (let key of objectKeys(newState)) {
             changeList.changes[key] = {
-                oldValue: this.currentState && (this.currentState as any)[key],
+                oldValue: (this.currentState as any)[key],
                 newValue: (newState as any)[key]
             };
         }

@@ -126,6 +126,62 @@ describe('ImmutableStateStore', () => {
         expect(emittedStates).to.have.lengthOf(1);
     });
 
+    describe('replaceState()', () => {
+
+        it('emits a change if the new state is different', () => {
+            const initialState = store.state;
+            const emittedStates = [] as ApplicationState[];
+            const sub = store.asObservable().subscribe(state => emittedStates.push(state));
+            store.replaceState({
+                shoppingCart: {
+                    items: [
+                        { sku: 7777, amount: 2 }
+                    ],
+                    lastAddedTime: new Date()
+                },
+                warehouse: {
+                    salePercentage: 5,
+                    stockKeepingUnits: {
+                        [7777]: {
+                            manufacturer: 'Banana Inc.',
+                            name: 'Bananaphone 7',
+                            price: 799
+                        }
+                    }
+                }
+            });
+            expect(emittedStates).to.have.lengthOf(1);
+            expect(store.state.warehouse.salePercentage).to.equal(5);
+            expect(store.actions.warehouse['warehouse'].salePercentage).to.equal(5);
+            expect(store.state === initialState).to.be.false;
+        });
+
+        it('does not change the state if the new state is equal to the old state', () => {
+            const initialState = store.state;
+            const emittedStates = [] as ApplicationState[];
+            const sub = store.asObservable().subscribe(state => emittedStates.push(state));
+            store.replaceState(store.state);
+            store.replaceState(store.state);
+            expect(emittedStates).to.have.lengthOf(0);
+            expect(store.state === initialState).to.be.true;
+        });
+
+        it('keeps state branches which have the same reference', () => {
+            const initialState = store.state;
+            const emittedStates = [] as ApplicationState[];
+            const sub = store.asObservable().subscribe(state => emittedStates.push(state));
+            store.replaceState({
+                shoppingCart: initialState.shoppingCart,
+                warehouse: { ...initialState.warehouse, salePercentage: 4 }
+            });
+            expect(emittedStates).to.have.lengthOf(1);
+            expect(store.state === initialState).to.be.false;
+            expect(store.state.shoppingCart === initialState.shoppingCart).to.be.true;
+            expect(store.state.warehouse === initialState.warehouse).to.be.false;
+        });
+
+    });
+
 });
 
 interface ShoppingCartState {
