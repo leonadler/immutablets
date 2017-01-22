@@ -27,7 +27,9 @@ export function deepClone(original: any, depth: number = Number.POSITIVE_INFINIT
     if (typeofOriginal === 'object') {
         const prototype = objectGetPrototypeOf(original);
 
-        if (prototype === RegExp.prototype) {
+        if (prototype === Object.prototype) {
+            return depth ? clonePropsTo({}, original, depth) : Object.assign({}, original);
+        } else if (prototype === RegExp.prototype) {
             return new RegExp(original);
         } else if (prototype === Date.prototype) {
             return new Date(original);
