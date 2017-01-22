@@ -93,4 +93,56 @@ describe('functionMutatesInput', () => {
         });
     });
 
+    it('detects when a function mutates a deep property of "this"', () => {
+        function nestedThisTest(): void {
+            (this as any).coordinates[0].x = 20;
+        }
+
+        const thisObj = {
+            coordinates: [
+                {
+                    x: 5,
+                    y: 7
+                }
+            ]
+        };
+
+        let result = functionMutatesInput(nestedThisTest, [], thisObj);
+        expect(result).to.deep.equal({
+            args: { },
+            this: [
+                { path: ['coordinates', '0', 'x'], oldValue: 5, newValue: 20 }
+            ]
+        });
+    });
+
+    it('detects when a function mutates a deep object property of "this" (depth 3)', () => {
+        class DeepChangeTest {
+            fileExplorer = {
+                folders: {
+                    1: { name: 'First folder', subfolders: [2, 3], files: [1, 2] },
+                }
+            };
+
+            testMethod(): void {
+                this.fileExplorer.folders[1].subfolders =
+                    this.fileExplorer.folders[1].subfolders.filter(f => f != 2);
+            }
+        }
+
+        const instance = new DeepChangeTest();
+
+        let result = functionMutatesInput(instance.testMethod, [], instance);
+        expect(result).to.deep.equal({
+            args: { },
+            this: [
+                {
+                    path: ['fileExplorer', 'folders', '1', 'subfolders'],
+                    oldValue: [2, 3],
+                    newValue: [3]
+                }
+            ]
+        });
+    });
+
 });

@@ -25,18 +25,18 @@ describe('CloneDepthDecorator', () => {
     });
 
     it('provides metadata that is used by the ImmutableDecorator', () => {
+        let unclonedPropAfter: any;
         let flatClonedPropAfter: any;
         let deeperClonedPropAfter: any;
 
         @Immutable()
         class TestClass {
-            @CloneDepth(0)
-            flatClonedProp = { a: 1 };
-
-            @CloneDepth(2)
-            deeperClonedProp = { b: { c: { d: 2 } } };
+            @CloneDepth(0) unclonedProp = { a: 2 };
+            @CloneDepth(1) flatClonedProp = { a: { b: 1 } };
+            @CloneDepth(2) deeperClonedProp = { b: { c: { d: 2 } } };
 
             someMethod(): void {
+                unclonedPropAfter = this.unclonedProp;
                 flatClonedPropAfter = this.flatClonedProp;
                 deeperClonedPropAfter = this.deeperClonedProp;
 
@@ -46,12 +46,15 @@ describe('CloneDepthDecorator', () => {
         }
 
         let instance = new TestClass();
+        const unclonedPropBefore = instance.unclonedProp;
         const flatClonedPropBefore = instance.flatClonedProp;
         const deeperClonedPropBefore = instance.deeperClonedProp;
 
         instance.someMethod();
 
-        expect(flatClonedPropAfter).to.equal(flatClonedPropBefore);
+        expect(unclonedPropAfter).to.equal(unclonedPropBefore);
+        expect(flatClonedPropAfter).not.to.equal(flatClonedPropBefore);
+        expect(flatClonedPropAfter.a).to.equal(flatClonedPropBefore.a);
         expect(deeperClonedPropAfter).not.to.equal(deeperClonedPropBefore);
         expect(deeperClonedPropAfter.b).not.to.equal(deeperClonedPropBefore.b);
         expect(deeperClonedPropAfter.b.c).to.equal(deeperClonedPropBefore.b.c);

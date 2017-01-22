@@ -207,13 +207,13 @@ describe('createImmutableClass', () => {
         expect(calledWith).to.deep.equal(['Arial', 14]);
     });
 
-    describe('generated methods', () => {
+    describe('generated method', () => {
 
         beforeEach(() => {
             immutableSettings({ checkMutability: true });
         });
 
-        it('are not bound to an instance', () => {
+        it('is not bound to an instance', () => {
             let calledFor: any;
 
             @Immutable()
@@ -229,7 +229,7 @@ describe('createImmutableClass', () => {
             expect(calledFor).to.equal(second);
         });
 
-        it('are bound to the original class', () => {
+        it('is bound to the original class', () => {
             @Immutable()
             class ExampleClassOne {
                 getNumber() { return 1; }
@@ -246,7 +246,7 @@ describe('createImmutableClass', () => {
             expect(shouldBe1).to.equal(1);
         });
 
-        it('are bound to the original method', () => {
+        it('is bound to the original method', () => {
             class ExampleClassOne {
                 getNumber() { return 1; }
             }
@@ -270,6 +270,150 @@ describe('createImmutableClass', () => {
 
             const list = new BadNonImmutableList();
             expect(() => list.add('Hello World')).to.throw();
+        });
+
+        it('throws when a nested property (depth 2) is changed non-immutable', () => {
+            @Immutable()
+            class BadCoordsList {
+                coords: { x: number, y: number }[] = [];
+                add(newCoord: { x: number, y: number }) {
+                    this.coords = [...this.coords, newCoord];
+                }
+
+                // This should throw
+                doubleAllXCoordinates(): void {
+                    this.coords = this.coords.map(coord => {
+                        coord.x = coord.x * 2;
+                        return coord;
+                    });
+                }
+            }
+
+            const coords = new BadCoordsList();
+            coords.add({ x: 1, y: 2 });
+            coords.add({ x: 5, y: 6 });
+            expect(() => coords.doubleAllXCoordinates()).to.throw();
+        });
+
+        it('throws when a nested property (depth 3) is changed non-immutable', () => {
+            interface Container { id: number; name: string }
+
+            @Immutable()
+            class BadContainerList {
+                containerState = {
+                    list: [] as Container[]
+                };
+
+                badAdd(newContainer: Container): void {
+                    this.containerState.list = [...this.containerState.list, newContainer];
+                }
+
+                okayAdd(newContainer: Container): void {
+                    this.containerState = { list: [...this.containerState.list, newContainer] };
+                }
+
+                badChangeName(id: number, newName: string): void {
+                    const container = this.containerState.list.filter(c => c.id === id)[0];
+                    if (container) {
+                        container.name = newName;
+                    }
+                }
+            }
+
+            immutableSettings(BadContainerList, { checkMutability: true });
+
+            const state = new BadContainerList();
+            expect(() => state.okayAdd({ id: 1, name: 'First container' }), 'error on "add first"').not.to.throw();
+            expect(() => state.okayAdd({ id: 2, name: 'Second container' }), 'error on "add second"').not.to.throw();
+            expect(() => state.badChangeName(1, 'First container changes name'), 'no error on "change name"').to.throw();
+            expect(() => state.badAdd({ id: 3, name: 'Third container' }), 'no error on "add third"').to.throw();
+        });
+
+        it('throws when a nested property (depth 4) is changed non-immutable', () => {
+            interface FileExplorerState {
+                folders: {
+                    [folderId: number]: {
+                        name: string,
+                        subfolders: number[],
+                        files: number[],
+                        parentFolder?: number;
+                    }
+                };
+                files: {
+                    [fileId: number]: {
+                        name: string,
+                        type: string
+                    }
+                };
+                currentFolder: number;
+            }
+
+            @Immutable()
+            class BadAppState {
+                fileExplorer: FileExplorerState = {
+                    folders: {
+                        1: { name: 'First folder', subfolders: [2, 3], files: [1, 2] },
+                        2: { name: 'Second folder', subfolders: [], files: [], parentFolder: 1 },
+                        3: { name: 'Third folder', subfolders: [], files: [], parentFolder: 1 }
+                    },
+                    files: {
+                        1: { name: 'myfiles.txt', type: 'text/plain' },
+                        2: { name: 'avatar.png', type: 'image/png' }
+                    },
+                    currentFolder: 1
+                };
+
+                badChangeFolderName(folderId: number, newName: string): void {
+                    this.fileExplorer.folders[folderId].name = newName;
+                }
+
+                okayChangeFolderName(folderId: number, newName: string): void {
+                    this.fileExplorer = {
+                        ...this.fileExplorer,
+                        folders: {
+                            ...this.fileExplorer.folders,
+                            [folderId]: {
+                                ...this.fileExplorer.folders[folderId],
+                                name: newName
+                            }
+                        }
+                    };
+                }
+
+                badDeleteFolder(folderId: number): void {
+                    const parent = this.fileExplorer.folders[folderId].parentFolder;
+                    if (parent) {
+                        this.fileExplorer.folders[parent].subfolders =
+                            this.fileExplorer.folders[parent].subfolders.filter(f => f != folderId);
+                    }
+                    // delete this.fileExplorer.folders[folderId];
+                }
+
+                goodDeleteFolder(folderId: number): void {
+                    const parent = this.fileExplorer.folders[folderId].parentFolder;
+                    const foldersNew: any = {};
+                    for (let id in this.fileExplorer.folders) {
+                        if (Number(id) !== folderId) {
+                            foldersNew[id] = this.fileExplorer.folders[id];
+                        }
+                    }
+                    if (parent) {
+                        foldersNew[parent] = { ...foldersNew[parent],
+                            subfolders: this.fileExplorer.folders[parent].subfolders.filter(f => f != folderId)
+                        };
+                    }
+
+                    this.fileExplorer = { ...this.fileExplorer, folders: foldersNew };
+                }
+            }
+
+            immutableSettings(BadAppState, { checkMutability: true });
+
+            const state = new BadAppState();
+            expect(() => state.okayChangeFolderName(2, 'Second folder with new name'), 'second').not.to.throw();
+            expect(() => state.badChangeFolderName(3, 'Third folder with new name'), 'third').to.throw();
+            expect(() => state.badDeleteFolder(2), 'delete second').to.throw();
+            expect(() => state.goodDeleteFolder(3), 'delete third').not.to.throw();
         });
 
         it('does not throw when an object property is changed by reference', () => {
@@ -325,12 +469,12 @@ describe('createImmutableClass', () => {
             expect(referenceAfterChange).not.to.equal(referenceBefore, 'after change === before');
         }
 
-        it('keep references which did not change during call (with mutability checking)', () => {
+        it('keeps references not changed during call (with mutability checking)', () => {
             immutableSettings({ checkMutability: true });
             keepsReferencesTest();
         });
 
-        it('keep references which did not change during call (mutability checking disabled)', () => {
+        it('keeps references not changed during call (mutability checking disabled)', () => {
             immutableSettings({ checkMutability: false });
             keepsReferencesTest();
         });
@@ -349,7 +493,7 @@ describe('restoreUnchangedProperties (internal)', () => {
         expect(clone.list).to.equal(original.list);
     });
 
-    it('uses changed references when any property changed', () => {
+    it('uses changed references when any property changed (number)', () => {
         const original = { list: [ { color: 'red' }, { color: 'green' } ] };
         const clone = { list: [ { color: 'red' }, { color: 'not green' } ] };
         restoreUnchangedProperties(clone, original, 3);
@@ -359,14 +503,24 @@ describe('restoreUnchangedProperties (internal)', () => {
         expect(clone.list[1]).not.to.equal(original.list[1]);
     });
 
-    it('uses changed references when any property changed', () => {
+    it('uses changed references when any property changed (hash)', () => {
         const original = { list: [ { color: 'red' }, { color: 'green' } ] };
         const clone = { list: [ { color: 'red' }, { color: 'not green' } ] };
-        restoreUnchangedProperties(clone, original, 3);
+        restoreUnchangedProperties(clone, original, { list: 2 });
         expect(clone).not.to.equal(original);
         expect(clone.list).not.to.equal(original.list);
         expect(clone.list[0]).to.equal(original.list[0]);
         expect(clone.list[1]).not.to.equal(original.list[1]);
+    });
+
+    it('uses changed references when above depth (hash)', () => {
+        const original = { list: [ { color: 'red' }, { color: 'green' } ] };
+        const clone = { list: [ { color: 'red' }, original.list[1] ] };
+        restoreUnchangedProperties(clone, original, { list: 1 });
+        expect(clone).not.to.equal(original);
+        expect(clone.list).not.to.equal(original.list);
+        expect(clone.list[0]).not.to.equal(original.list[0]);
+        expect(clone.list[1]).to.equal(original.list[1]);
     });
 
 });

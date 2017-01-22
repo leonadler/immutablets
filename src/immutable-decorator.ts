@@ -42,16 +42,20 @@ let constructing: boolean = false;
  *         };
  *     }
  */
-export function Immutable(): <T, C extends ClassOf<T>>(target: C) => C {
-    return function ImmutableClassDecorator<T, C extends ClassOf<T>>(originalClass: C): C {
+export function Immutable(): <T, C extends ClassOf<T>>(target: C) => C;
+/** Declares a class as immutable. */
+export function Immutable<T, C extends ClassOf<T>>(target: C): C;
+
+export function Immutable(originalClass?: any): any {
+    if (originalClass) {
         return createImmutableClass(originalClass);
-    };
+    } else {
+        return Immutable;
+    }
 }
 
 
-/**
- * @internal
- */
+/** @internal */
 export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C): C {
 
     function mappedConstructor(this: T, ...args: any[]) {
@@ -136,7 +140,9 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
         const mutations = runAndCheckChanges(() => {
             for (let key of objectKeys(this)) {
                 originalProperties[key] = this[key];
-                this[key] = deepClone(this[key], (cloneDepth[key] || 0) - 1);
+                if (cloneDepth[key] > 0) {
+                    this[key] = deepClone(this[key], cloneDepth[key] - 1);
+                }
             }
 
             returnValue = originalMethod.apply(this, args);
@@ -146,8 +152,11 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
         }, args, this);
 
         if (mutations) {
-            // A method has changed a property without cloning the object first
-            throw new MethodNotImmutableError(mutations, originalMethod, originalClass);
+            // Throw when a method changes "this.prop.otherProp", but not "this.prop"
+            if (mutations.this.some(change => change.path.length > 1) || Object.keys(mutations.args).length > 0) {
+                // A method has changed a property without cloning the object first
+                throw new MethodNotImmutableError(mutations, originalMethod, originalClass);
+            }
         }
 
         // Notify all observers added by ObserveChanges
@@ -192,10 +201,10 @@ export function restoreUnchangedProperties(target: any, original: any, depthArg:
             const depth = typeof depthArg === 'number' ? depthArg : depthArg[key];
             if (depth > 0) {
                 restoreUnchangedProperties(target[key], original[key], depth - 1);
-            }
 
-            if (flatEqual(target[key], original[key])) {
-                target[key] = original[key];
+                if (target[key] !== original[key] && flatEqual(target[key], original[key])) {
+                    target[key] = original[key];
+                }
             }
         }
     }

@@ -34,7 +34,6 @@ export function immutableSettings(classOrGlobalSettings: any, classSettings?: Im
         globalSettings.checkMutability = settings.checkMutability;
     } else {
         const metadata = getImmutableMetadata(classOrGlobalSettings);
-        debugger;
         if (!metadata) {
             throw new TypeError('Not an immutable class');
         }

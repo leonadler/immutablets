@@ -71,7 +71,7 @@ function checkSnapshotChanges(snapshotMap: Snapshot): ChangedProperty[] {
                     path: [...snapshot.path, key],
                     newValue
                 });
-            } else if ((typeof object[key] !== 'object' || object === null) && newValue !== snapshot.value[key]) {
+            } else if (newValue !== snapshot.value[key]) {
                 changes.push({
                     path: [...snapshot.path, key],
                     oldValue: snapshot.value[key],
