@@ -91,6 +91,13 @@ When the method creates a new object instead of changing an existing one, no err
     }
 ```
 
+## Documentation
+
+(work in progress)
+
+* [How to use](docs/how-to-use.md)
+* [@Immutable](docs/immutable-decorator.md)
+
 ## License
 
 [MIT](LICENSE)
