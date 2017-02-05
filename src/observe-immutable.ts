@@ -1,6 +1,5 @@
-import { AnonymousSubscription, ChangeList, ImmutableMetadata, Subscribable } from './immutable-interfaces';
-import { immutableObserversSymbol } from './immutable-settings';
-import { getFunctionName, objectGetPrototypeOf } from './utils';
+import { AnonymousSubscription, ChangeList, ImmutableClassMetadata, Subscribable } from './immutable-interfaces';
+import { getFunctionName, objectGetPrototypeOf, getInstanceMetadata } from './utils';
 
 
 /**
@@ -16,8 +15,8 @@ export function observeImmutable<T>(instance: T): Subscribable<ChangeList>;
 
 
 export function observeImmutable<T>(instance: T, observableClass?: any): Subscribable<ChangeList> {
-    const observers = (instance as any)[immutableObserversSymbol] as ((changeList: ChangeList) => void)[];
-    if (!observers) {
+    const instanceMetadata = getInstanceMetadata(instance);
+    if (!instanceMetadata) {
         const constructor = objectGetPrototypeOf(instance).constructor;
         const className = constructor && getFunctionName(constructor) || 'object class';
         throw new Error(className + ' is not decorated as @Immutable.');
@@ -25,12 +24,12 @@ export function observeImmutable<T>(instance: T, observableClass?: any): Subscri
 
     if (observableClass) {
         // Use a RXJS implementation passed by the user.
-        return new observableClass((subscriber: any) => handleSubscription(subscriber, observers));
+        return new observableClass((subscriber: any) => handleSubscription(subscriber, instanceMetadata.changeObservers));
     }
 
     // Use a plain JavaScript Observable.
     return {
-        subscribe: (subscriber: any) => handleSubscription(subscriber, observers)
+        subscribe: (subscriber: any) => handleSubscription(subscriber, instanceMetadata.changeObservers)
     };
 }
 

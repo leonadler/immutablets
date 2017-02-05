@@ -1,10 +1,5 @@
-import { ImmutableSettings } from './immutable-interfaces';
-import { getImmutableMetadata, setImmutableMetadata } from './utils';
-
-/** @internal */
-export const immutableObserversSymbol = typeof Symbol === 'function'
-    ? Symbol('immutable-observers')
-    : '@@immutable-observers';
+import { ImmutableSettings, ImmutableInstanceMetadata } from './immutable-interfaces';
+import { getImmutableClassMetadata, setImmutableClassMetadata } from './utils';
 
 /** @internal */
 export const globalSettings: ImmutableSettings = {
@@ -14,7 +9,7 @@ export const globalSettings: ImmutableSettings = {
 /** @internal */
 export function getSettings(target?: any): ImmutableSettings | undefined {
     if (target) {
-        const metadata = getImmutableMetadata(target);
+        const metadata = getImmutableClassMetadata(target);
         return metadata && metadata.settings || globalSettings;
     } else {
         return globalSettings;
@@ -33,7 +28,7 @@ export function immutableSettings(classOrGlobalSettings: any, classSettings?: Im
         const settings = classOrGlobalSettings as ImmutableSettings;
         globalSettings.checkMutability = settings.checkMutability;
     } else {
-        const metadata = getImmutableMetadata(classOrGlobalSettings);
+        const metadata = getImmutableClassMetadata(classOrGlobalSettings);
         if (!metadata) {
             throw new TypeError('Not an immutable class');
         }

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Immutable, createImmutableClass } from './immutable-decorator';
 import { isImmutableClass } from './is-immutable-class';
-import { setImmutableMetadata } from './utils';
+import { setImmutableClassMetadata } from './utils';
 
 describe('isImmutableClass', () => {
 
@@ -26,7 +26,7 @@ describe('isImmutableClass', () => {
 
     it('returns true for a class with immutable metadata', () => {
         class ExampleClass { }
-        setImmutableMetadata(ExampleClass, {});
+        setImmutableClassMetadata(ExampleClass, {});
 
         expect(isImmutableClass(ExampleClass)).to.be.true;
     });

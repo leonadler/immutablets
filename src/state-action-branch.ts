@@ -1,6 +1,6 @@
 import { isConstructingImmutable } from './immutable-decorator';
 import { isImmutableClass } from './is-immutable-class';
-import { getFunctionName, getImmutableMetadata, isArray, objectDefineProperty, objectGetPrototypeOf } from './utils';
+import { getFunctionName, getImmutableClassMetadata, isArray, objectDefineProperty, objectGetPrototypeOf } from './utils';
 
 /**
  * Abstract base class for state action branches of an {@link ImmutableStateStore}.

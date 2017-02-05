@@ -1,4 +1,4 @@
-import { ImmutableMetadata } from './immutable-interfaces';
+import { ImmutableClassMetadata, ImmutableInstanceMetadata } from './immutable-interfaces';
 
 /** @internal */
 export function getFunctionName(fn: Function, prototype?: any): string {
@@ -50,19 +50,21 @@ export function parseFunctionSource(source: string): { name: string, argNames: s
     return { name, argNames };
 }
 
-let metadataWeakMap: WeakMap<any, Partial<ImmutableMetadata>>;
-let metadataSymbol = (typeof Symbol === 'function') ? Symbol('immutablets') : '@@immutablets';
+let classMetadataWeakMap: WeakMap<any, Partial<ImmutableClassMetadata>>;
+const classMetadataSymbol = (typeof Symbol === 'function') ? Symbol('immutablets') : '@@immutablets';
+let instanceMetadataWeakMap: WeakMap<any, ImmutableInstanceMetadata>;
+const instanceMetadataSymbol = (typeof Symbol === 'function') ? Symbol('immutablets-instance') : '@@immutablets-instance';
 
 /** @internal */
-export function getImmutableMetadata(target: Function): Partial<ImmutableMetadata> | undefined {
+export function getImmutableClassMetadata(target: Function): Partial<ImmutableClassMetadata> | undefined {
     if (typeof Reflect === 'object' && (Reflect as any).getMetadata) {
         return (Reflect as any).getMetadata('immutablets', target);
     } else if (typeof WeakMap === 'function') {
-        if (!metadataWeakMap) {
-            metadataWeakMap = new WeakMap();
+        if (!classMetadataWeakMap) {
+            classMetadataWeakMap = new WeakMap();
         }
         do {
-            let metadata = metadataWeakMap.get(target);
+            let metadata = classMetadataWeakMap.get(target);
             if (metadata) {
                 return metadata;
             }
@@ -71,7 +73,7 @@ export function getImmutableMetadata(target: Function): Partial<ImmutableMetadat
         } while (target);
     } else {
         do {
-            let metadata = (target as any)[metadataSymbol];
+            let metadata = (target as any)[classMetadataSymbol];
             if (metadata) {
                 return metadata;
             }
@@ -82,19 +84,55 @@ export function getImmutableMetadata(target: Function): Partial<ImmutableMetadat
 }
 
 /** @internal */
-export function setImmutableMetadata(target: Function, data: Partial<ImmutableMetadata>): void {
+export function setImmutableClassMetadata(target: Function, data: Partial<ImmutableClassMetadata>): void {
     if (typeof Reflect === 'object' && (Reflect as any).defineMetadata) {
         (Reflect as any).defineMetadata('immutablets', data, target);
     } else if (typeof WeakMap === 'function') {
-        if (!metadataWeakMap) {
-            metadataWeakMap = new WeakMap();
+        if (!classMetadataWeakMap) {
+            classMetadataWeakMap = new WeakMap();
         }
-        metadataWeakMap.set(target, data);
+        classMetadataWeakMap.set(target, data);
     } else {
-        Object.defineProperty(target, metadataSymbol, {
+        Object.defineProperty(target, classMetadataSymbol, {
             configurable: true,
             enumerable: false,
-            value: metadataSymbol,
+            value: classMetadataSymbol,
+            writable: false
+        });
+    }
+}
+
+/** @internal */
+export function getInstanceMetadata(target: any): ImmutableInstanceMetadata | undefined {
+    if (typeof WeakMap === 'function') {
+        if (!instanceMetadataWeakMap) {
+            instanceMetadataWeakMap = new WeakMap();
+        }
+        return instanceMetadataWeakMap.get(target);
+    } else {
+        return target[instanceMetadataSymbol];
+    }
+}
+
+
+/** @internal */
+export function setInitialInstanceMetadata(target: any): void {
+    if (typeof WeakMap === 'function') {
+        if (!instanceMetadataWeakMap) {
+            instanceMetadataWeakMap = new WeakMap();
+        }
+        instanceMetadataWeakMap.set(target, {
+            callDepth: 0,
+            changeObservers: []
+        });
+    } else {
+        Object.defineProperty(target, instanceMetadataSymbol, {
+            configurable: true,
+            enumerable: false,
+            value: {
+                callDepth: 0,
+                changeObservers: []
+            },
             writable: false
         });
     }

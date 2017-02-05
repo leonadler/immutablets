@@ -33,10 +33,16 @@ export interface ImmutableSettings {
 }
 
 /** @internal */
-export interface ImmutableMetadata {
+export interface ImmutableClassMetadata {
     cloneDepth: { [propertyKey: string]: number };
     originalClass: any;
     settings: ImmutableSettings;
+}
+
+/** @internal */
+export interface ImmutableInstanceMetadata {
+    callDepth: number;
+    changeObservers: Array<(changeList: ChangeList) => void>;
 }
 
 /** Subscription interface from rxjs 5 */

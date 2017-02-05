@@ -1,5 +1,5 @@
 import { ClassOf } from './immutable-interfaces';
-import { getFunctionName, getImmutableMetadata, setImmutableMetadata } from './utils';
+import { getFunctionName, getImmutableClassMetadata, setImmutableClassMetadata } from './utils';
 import { isImmutableClass } from './is-immutable-class';
 
 
@@ -25,9 +25,9 @@ import { isImmutableClass } from './is-immutable-class';
  */
 export function CloneDepth(depth: number): <T>(prototype: T, key: string, dontUseOnMethods?: undefined) => void {
     return function CloneDepthDecorator<T>(prototype: T, key: string): void {
-        const existingMetadata = getImmutableMetadata(prototype.constructor);
+        const existingMetadata = getImmutableClassMetadata(prototype.constructor);
         const cloneDepth = existingMetadata && existingMetadata.cloneDepth || {};
         const metaData = { ...(existingMetadata || {}), cloneDepth: { ...cloneDepth, [key]: depth} };
-        setImmutableMetadata(prototype.constructor, metaData);
+        setImmutableClassMetadata(prototype.constructor, metaData);
     };
 }

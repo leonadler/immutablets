@@ -1,11 +1,12 @@
 import { deepClone } from './deep-clone';
 import { flatEqual } from './flat-equal';
 import { functionMutatesInput } from './function-mutates-input';
-import { ClassOf, ImmutableMetadata, ChangeList } from './immutable-interfaces';
-import { globalSettings,  immutableObserversSymbol } from './immutable-settings';
+import { ClassOf, ImmutableClassMetadata, ChangeList, ImmutableInstanceMetadata } from './immutable-interfaces';
+import { globalSettings } from './immutable-settings';
 import { MethodNotImmutableError } from './method-not-immutable-error';
-import { getFunctionName, getImmutableMetadata, hasOwnProperty, objectCreate, objectDefineProperty,
-    objectKeys, setImmutableMetadata } from './utils';
+import { getInstanceMetadata, setInitialInstanceMetadata } from './utils';
+import { getFunctionName, getImmutableClassMetadata, hasOwnProperty, objectCreate, objectDefineProperty,
+    objectKeys, setImmutableClassMetadata } from './utils';
 
 
 let constructing: boolean = false;
@@ -68,21 +69,16 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
             objectDefineProperty(this, key, descriptor);
         }
 
-        objectDefineProperty(this, immutableObserversSymbol, {
-            configurable: true,
-            enumerable: false,
-            writable: false,
-            value: []
-        });
+        setInitialInstanceMetadata(this);
     }
 
     const className = getFunctionName(originalClass);
     const mappedClass = createNamedFunction(className, mappedConstructor);
-    const originalMetadata = getImmutableMetadata(originalClass);
+    const originalMetadata = getImmutableClassMetadata(originalClass);
     const originalPrototype = originalClass.prototype as any;
     const mappedPrototype: any = mappedClass.prototype = objectCreate(originalClass.prototype);
 
-    const metadata: ImmutableMetadata = {
+    const metadata: ImmutableClassMetadata = {
         cloneDepth: originalMetadata && originalMetadata.cloneDepth || {},
         originalClass,
         settings: globalSettings,
@@ -111,8 +107,8 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
     }
 
     // Define immutable-specific metadata
-    setImmutableMetadata(mappedClass, metadata);
-    setImmutableMetadata(mappedPrototype, metadata);
+    setImmutableClassMetadata(mappedClass, metadata);
+    setImmutableClassMetadata(mappedPrototype, metadata);
 
     return mappedClass as any;
 }
@@ -124,10 +120,11 @@ function createNamedFunction(name: string, realImplementation: (this: any, ...ar
     return creator(realImplementation);
 }
 
-function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetadata): Function {
+function createMethodWrapper(originalMethod: Function, classMetadata: ImmutableClassMetadata): Function {
     let wrapped = function immutableWrappedMethod(...args: any[]) {
 
-        const { cloneDepth, originalClass, settings } = metadata;
+        const { cloneDepth, originalClass, settings } = classMetadata;
+        const instanceMetadata = (getInstanceMetadata(this) || {}) as ImmutableInstanceMetadata;
 
         const originalProperties: any = {};
         let returnValue: any;
@@ -145,7 +142,12 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
                 }
             }
 
-            returnValue = originalMethod.apply(this, args);
+            instanceMetadata.callDepth++;
+            try {
+                returnValue = originalMethod.apply(this, args);
+            } finally {
+                instanceMetadata.callDepth--;
+            }
 
             // Restore unchanged properties
             restoreUnchangedProperties(this, originalProperties, cloneDepth);
@@ -160,9 +162,8 @@ function createMethodWrapper(originalMethod: Function, metadata: ImmutableMetada
         }
 
         // Notify all observers added by ObserveChanges
-        const observers = this[immutableObserversSymbol] as ((c: ChangeList) => void)[];
-
-        if (observers && observers.length > 0) {
+        const observers = instanceMetadata.changeObservers;
+        if (observers && observers.length > 0 && !instanceMetadata.callDepth) {
             const changeList: ChangeList = {
                 instance: this,
                 changes: { }

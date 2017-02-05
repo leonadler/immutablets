@@ -152,4 +152,83 @@ describe('observeImmutable', () => {
 
         sub.unsubscribe();
     });
+
+    it('only emits changes once when another method of the same instance is called', () => {
+        @Immutable()
+        class NestedMethodCallsTest {
+            propA = 1;
+            propB = 'a';
+
+            firstMethod(): void {
+                this.propA = 2;
+                this.secondMethod();
+            }
+
+            secondMethod(): void {
+                this.propB = 'b';
+            }
+        }
+
+        const instance = new NestedMethodCallsTest();
+        const emittedChanges = [] as any[];
+        const sub = observeImmutable(instance).subscribe(changes => emittedChanges.push(changes));
+
+        expect(emittedChanges).to.have.lengthOf(0);
+
+        instance.firstMethod();
+        expect(emittedChanges).to.have.lengthOf(1);
+        expect(emittedChanges[0]).to.deep.equal({
+            instance: instance,
+            changes: {
+                propA: { oldValue: 1, newValue: 2 },
+                propB: { oldValue: 'a', newValue: 'b' }
+            }
+        });
+
+        sub.unsubscribe();
+    });
+
+    it('emits for every changed instance on nested method calls', () => {
+        let secondInstance: NestedMethodCallsOnDifferentInstancesTest;
+
+        @Immutable()
+        class NestedMethodCallsOnDifferentInstancesTest {
+            propA = 1;
+            propB = 'a';
+
+            firstMethod(): void {
+                this.propA = this.propA + 1;
+                secondInstance.secondMethod();
+            }
+
+            secondMethod(): void {
+                this.propB = 'b';
+            }
+        }
+
+        const firstInstance = new NestedMethodCallsOnDifferentInstancesTest();
+        secondInstance = new NestedMethodCallsOnDifferentInstancesTest();
+        secondInstance.propA = 99;
+        secondInstance.propB = 'x';
+
+        const emittedChanges = [] as any[];
+        const subs = [
+            observeImmutable(firstInstance).subscribe(changes => emittedChanges.push(changes)),
+            observeImmutable(secondInstance).subscribe(changes => emittedChanges.push(changes))
+        ];
+
+        expect(emittedChanges).to.have.lengthOf(0);
+
+        firstInstance.firstMethod();
+        expect(emittedChanges).to.have.lengthOf(2);
+        expect(emittedChanges[0].instance).to.equal(secondInstance);
+        expect(emittedChanges[0].changes).to.deep.equal({
+            propB: { oldValue: 'x', newValue: 'b' }
+        });
+        expect(emittedChanges[1].instance).to.equal(firstInstance);
+        expect(emittedChanges[1].changes).to.deep.equal({
+            propA: { oldValue: 1, newValue: 2 }
+        });
+    });
+
 });

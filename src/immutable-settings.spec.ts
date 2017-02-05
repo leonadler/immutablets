@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { Immutable } from './immutable-decorator';
 import { ImmutableSettings } from './immutable-interfaces';
 import { immutableSettings, getSettings } from './immutable-settings';
-import { getImmutableMetadata } from './utils';
+import { getImmutableClassMetadata } from './utils';
 
 
 describe('immutableSettings', () => {
@@ -36,7 +36,7 @@ describe('immutableSettings', () => {
             class TestClass { }
 
             immutableSettings(TestClass, { checkMutability: true });
-            expect(getImmutableMetadata(TestClass)).not.to.be.undefined;
+            expect(getImmutableClassMetadata(TestClass)).not.to.be.undefined;
         });
 
         it('stores the settings by reference', () => {
