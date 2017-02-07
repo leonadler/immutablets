@@ -1,12 +1,12 @@
 import { deepClone } from './deep-clone';
 import { flatEqual } from './flat-equal';
 import { functionMutatesInput } from './function-mutates-input';
-import { ClassOf, ImmutableClassMetadata, ChangeList, ImmutableInstanceMetadata } from './immutable-interfaces';
+import { ClassOf, ImmutableClassMetadata, TrackedMethodCall, ImmutableInstanceMetadata } from './immutable-interfaces';
 import { globalSettings } from './immutable-settings';
 import { MethodNotImmutableError } from './method-not-immutable-error';
 import { getInstanceMetadata, setInitialInstanceMetadata } from './utils';
-import { getFunctionName, getImmutableClassMetadata, hasOwnProperty, objectCreate, objectDefineProperty,
-    objectKeys, setImmutableClassMetadata } from './utils';
+import { getFunctionName, getImmutableClassMetadata, hasOwnProperty, objectAssign, objectCreate,
+    objectDefineProperty, objectKeys, setImmutableClassMetadata } from './utils';
 
 
 let constructing: boolean = false;
@@ -88,7 +88,7 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
     for (let propertyKey of Object.getOwnPropertyNames(originalPrototype)) {
         let method = originalPrototype[propertyKey];
         if (propertyKey !== 'constructor' && typeof method === 'function') {
-            mappedPrototype[propertyKey] = createMethodWrapper(method, metadata);
+            mappedPrototype[propertyKey] = createMethodWrapper(method, propertyKey, metadata);
         }
     }
 
@@ -120,7 +120,7 @@ function createNamedFunction(name: string, realImplementation: (this: any, ...ar
     return creator(realImplementation);
 }
 
-function createMethodWrapper(originalMethod: Function, classMetadata: ImmutableClassMetadata): Function {
+function createMethodWrapper(originalMethod: Function, methodName: string, classMetadata: ImmutableClassMetadata): Function {
     let wrapped = function immutableWrappedMethod(...args: any[]) {
 
         const { cloneDepth, originalClass, settings } = classMetadata;
@@ -162,19 +162,25 @@ function createMethodWrapper(originalMethod: Function, classMetadata: ImmutableC
         }
 
         // Notify all observers added by ObserveChanges
-        const observers = instanceMetadata.changeObservers;
+        const observers = instanceMetadata.observers;
         if (observers && observers.length > 0 && !instanceMetadata.callDepth) {
-            const changeList: ChangeList = {
+            const call: TrackedMethodCall<any> = {
                 instance: this,
-                changes: { }
+                methodName,
+                arguments: args,
+                returnValue,
+                changes: undefined,
+                oldProperties: originalProperties,
+                newProperties: objectAssign({}, this)
             };
 
             let hasChanges = false;
+            let changes: any = {};
 
             for (let key of objectKeys(this)) {
                 if (this[key] !== originalProperties[key]) {
                     hasChanges = true;
-                    changeList.changes[key] = {
+                    changes[key] = {
                         oldValue: originalProperties[key],
                         newValue: this[key]
                     }
@@ -182,9 +188,11 @@ function createMethodWrapper(originalMethod: Function, classMetadata: ImmutableC
             }
 
             if (hasChanges) {
-                for (let observer of observers) {
-                    observer(changeList);
-                }
+                call.changes = changes;
+            }
+
+            for (let observer of observers) {
+                observer(call);
             }
         }
 

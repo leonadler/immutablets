@@ -3,7 +3,7 @@ export { deepClone } from './deep-clone';
 export { deepEqual } from './deep-equal';
 export { flatEqual } from './flat-equal';
 export { Immutable } from './immutable-decorator';
-export { ChangeList } from './immutable-interfaces';
+export { AnonymousSubscription, PartialObserver, Subscribable, TrackedMethodCall } from './immutable-interfaces';
 export { immutableSettings } from './immutable-settings';
 export { ImmutableStateStore } from './immutable-state-store';
 export { isCyclicStructure } from './is-cyclic-structure';

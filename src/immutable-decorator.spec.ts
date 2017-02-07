@@ -5,7 +5,6 @@ import { Immutable, createImmutableClass, restoreUnchangedProperties } from './i
 import { immutableSettings } from './immutable-settings';
 import { isImmutableClass } from './is-immutable-class';
 import { CloneDepth } from './clone-depth-decorator';
-import { ChangeList } from './immutable-interfaces';
 
 
 describe('Immutable decorator', () => {

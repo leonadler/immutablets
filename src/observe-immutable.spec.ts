@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { Immutable } from './immutable-decorator';
 import { immutableSettings } from './immutable-settings';
 import { observeImmutable } from './observe-immutable';
+import { TrackedMethodCall } from './immutable-interfaces';
 
 
 describe('observeImmutable', () => {
@@ -18,7 +19,7 @@ describe('observeImmutable', () => {
     }
     immutableSettings(ImmutableList, { checkMutability: true });
 
-    it('returns an observable stream that emits property changes', () => {
+    it('returns an observable stream that emits propery changes on method call', () => {
         const list = new ImmutableList<number>();
         const emittedChanges = [] as any[];
 
@@ -177,12 +178,10 @@ describe('observeImmutable', () => {
 
         instance.firstMethod();
         expect(emittedChanges).to.have.lengthOf(1);
-        expect(emittedChanges[0]).to.deep.equal({
-            instance: instance,
-            changes: {
-                propA: { oldValue: 1, newValue: 2 },
-                propB: { oldValue: 'a', newValue: 'b' }
-            }
+        expect(emittedChanges[0].instance).to.equal(instance);
+        expect(emittedChanges[0].changes).to.deep.equal({
+            propA: { oldValue: 1, newValue: 2 },
+            propB: { oldValue: 'a', newValue: 'b' }
         });
 
         sub.unsubscribe();
@@ -228,6 +227,116 @@ describe('observeImmutable', () => {
         expect(emittedChanges[1].instance).to.equal(firstInstance);
         expect(emittedChanges[1].changes).to.deep.equal({
             propA: { oldValue: 1, newValue: 2 }
+        });
+
+        subs.forEach(sub => sub.unsubscribe());
+    });
+
+    it('emits call information for every method call', () => {
+        @Immutable()
+        class CallInformationTest {
+            list: string[] = [];
+            count = 0;
+
+            add(value: string): void {
+                this.list = [...this.list, value];
+                this.count += 1;
+            }
+
+            remove(valueToRemove: string): void {
+                const index = this.list.indexOf(valueToRemove);
+                if (index >= 0) {
+                    this.list = this.list.slice().splice(index, 1);
+                    this.count -= 1;
+                }
+            }
+        }
+
+        const testList = new CallInformationTest();
+        const trackedCalls = [] as TrackedMethodCall<any>[];
+        observeImmutable(testList).subscribe(callInfo => trackedCalls.push(callInfo)),
+
+        expect(trackedCalls).to.have.lengthOf(0);
+
+        testList.add('one');
+        expect(trackedCalls).to.have.lengthOf(1);
+        expect(trackedCalls[0]).to.deep.equal({
+            instance: testList,
+            methodName: 'add',
+            arguments: ['one'],
+            returnValue: undefined,
+            changes: {
+                list: { oldValue: [], newValue: ['one'] },
+                count: { oldValue: 0, newValue: 1 }
+            },
+            oldProperties: {
+                list: [],
+                count: 0
+            },
+            newProperties: {
+                list: ['one'],
+                count: 1
+            }
+        });
+
+        testList.add('two')
+
+        expect(trackedCalls).to.have.lengthOf(2);
+        expect(trackedCalls[1]).to.deep.equal({
+            instance: testList,
+            methodName: 'add',
+            arguments: ['two'],
+            returnValue: undefined,
+            changes: {
+                list: { oldValue: ['one'], newValue: ['one', 'two'] },
+                count: { oldValue: 1, newValue: 2 }
+            },
+            oldProperties: {
+                list: ['one'],
+                count: 1
+            },
+            newProperties: {
+                list: ['one', 'two'],
+                count: 2
+            }
+        });
+    });
+
+    it('emits call information for method calls which do not change properties', () => {
+        @Immutable()
+        class CallInformationOnNonChangingMethodsTest {
+            a = 5;
+            b = 7;
+
+            setTo5And7(): number {
+                this.a = 5;
+                this.b = 7;
+                return 5 + 7;
+            }
+        }
+
+        const instance = new CallInformationOnNonChangingMethodsTest();
+        const trackedCalls = [] as TrackedMethodCall<any>[];
+        observeImmutable(instance).subscribe(callInfo => trackedCalls.push(callInfo)),
+
+        expect(trackedCalls).to.have.lengthOf(0);
+
+        instance.setTo5And7();
+        expect(trackedCalls).to.have.lengthOf(1);
+        expect(trackedCalls[0]).to.deep.equal({
+            instance: instance,
+            methodName: 'setTo5And7',
+            arguments: [],
+            returnValue: 5 + 7,
+            changes: undefined,
+            oldProperties: {
+                a: 5,
+                b: 7
+            },
+            newProperties: {
+                a: 5,
+                b: 7
+            }
         });
     });
 

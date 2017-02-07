@@ -123,7 +123,7 @@ export function setInitialInstanceMetadata(target: any): void {
         }
         instanceMetadataWeakMap.set(target, {
             callDepth: 0,
-            changeObservers: []
+            observers: []
         });
     } else {
         Object.defineProperty(target, instanceMetadataSymbol, {
