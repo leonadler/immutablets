@@ -54,7 +54,7 @@ Observe the application state for changes:
 class FolderDetailsComponent {
     currentFolder: Observable<Folder>;
     constructor(private appState: ApplicationState) {
-        this.currentFolder = Observable.from(observeChanges(appState))
+        this.currentFolder = observeChanges(appState, Observable)
             .map(state => state.folders[state.currentFolder])
             .distinctUntilChanged();
     }

@@ -1,4 +1,4 @@
-import { isArray, objectCreate, objectKeys, objectGetPrototypeOf } from './utils';
+import { isArray, objectAssign, objectCreate, objectKeys, objectGetPrototypeOf } from './utils';
 
 declare var Node: any;
 
@@ -28,7 +28,7 @@ export function deepClone(original: any, depth: number = Number.POSITIVE_INFINIT
         const prototype = objectGetPrototypeOf(original);
 
         if (prototype === Object.prototype) {
-            return depth ? clonePropsTo({}, original, depth) : Object.assign({}, original);
+            return depth ? clonePropsTo({}, original, depth) : objectAssign({}, original);
         } else if (prototype === RegExp.prototype) {
             return new RegExp(original);
         } else if (prototype === Date.prototype) {
