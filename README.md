@@ -1,4 +1,4 @@
-# Immutable, Observable, performant typed structures for TypeScript.
+# Performant immutable structures for TypeScript.
 
 [![npm version](https://badge.fury.io/js/immutablets.svg)](https://www.npmjs.com/package/immutablets)
 
@@ -97,6 +97,7 @@ When the method creates a new object instead of changing an existing one, no err
 
 * [How to use](docs/how-to-use.md)
 * [@Immutable](docs/immutable-decorator.md)
+* [ImmutableStateStore](docs/immutable-state-store.md)
 
 ## License
 
