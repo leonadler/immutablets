@@ -243,6 +243,20 @@ describe('withChanges', () => {
             expect(dogAfraidOfWater).to.be.an.instanceof(Animal);
         });
 
+        it('allows changing properties of the clone which were frozen on the original', () => {
+            const user = Object.freeze({
+                id: 1234,
+                name: 'admin'
+            });
+            expect(() => { (user as any).name = 'Not admin'; }).to.throw();
+
+            const result = withChanges(user, userToChange => {
+                userToChange.name = 'Not admin';
+            });
+            expect(result.name).to.equal('Not admin');
+            expect(user.name).to.equal('admin');
+        });
+
     });
 
     describe('<array, function>', () => {
