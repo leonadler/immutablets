@@ -3,7 +3,8 @@ import { getImmutableClassMetadata, setImmutableClassMetadata } from './utils';
 
 /** @internal */
 export const globalSettings: ImmutableSettings = {
-    checkMutability: true
+    checkMutability: true,
+    deepFreeze: false
 };
 
 /** @internal */

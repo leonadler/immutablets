@@ -5,6 +5,7 @@ import { ClassOf, ImmutableClassMetadata, TrackedMethodCall, ImmutableInstanceMe
 import { globalSettings } from './immutable-settings';
 import { MethodNotImmutableError } from './method-not-immutable-error';
 import { getInstanceMetadata, setInitialInstanceMetadata } from './utils';
+import { deepFreeze } from './deep-freeze';
 import { getFunctionName, getImmutableClassMetadata, hasOwnProperty, objectAssign, objectCreate,
     objectDefineProperty, objectKeys, setImmutableClassMetadata } from './utils';
 
@@ -59,6 +60,14 @@ export function Immutable(originalClass?: any): any {
 /** @internal */
 export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C): C {
 
+    const originalMetadata = getImmutableClassMetadata(originalClass);
+    const metadata: ImmutableClassMetadata = {
+        cloneDepth: originalMetadata && originalMetadata.cloneDepth || {},
+        originalClass,
+        settings: globalSettings,
+    };
+
+    // Constructor that will be called on `new Class()` instead of the original constructor.
     function mappedConstructor(this: T, ...args: any[]) {
         constructing = true;
         let instance = new originalClass(...args);
@@ -70,19 +79,21 @@ export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C):
         }
 
         setInitialInstanceMetadata(this);
+
+        if (metadata.settings.deepFreeze) {
+            for (let key of objectKeys(this)) {
+                const propertyValue = (this as any)[key];
+                if (typeof propertyValue === 'object' && propertyValue) {
+                    deepFreeze(propertyValue);
+                }
+            }
+        }
     }
 
     const className = getFunctionName(originalClass);
     const mappedClass = createNamedFunction(className, mappedConstructor);
-    const originalMetadata = getImmutableClassMetadata(originalClass);
     const originalPrototype = originalClass.prototype as any;
     const mappedPrototype: any = mappedClass.prototype = objectCreate(originalClass.prototype);
-
-    const metadata: ImmutableClassMetadata = {
-        cloneDepth: originalMetadata && originalMetadata.cloneDepth || {},
-        originalClass,
-        settings: globalSettings,
-    };
 
     // Map methods of the original class
     for (let propertyKey of Object.getOwnPropertyNames(originalPrototype)) {
@@ -158,6 +169,15 @@ function createMethodWrapper(originalMethod: Function, methodName: string, class
             if (mutations.this.some(change => change.path.length > 1) || Object.keys(mutations.args).length > 0) {
                 // A method has changed a property without cloning the object first
                 throw new MethodNotImmutableError(mutations, originalMethod, originalClass);
+            }
+        }
+
+        if (classMetadata.settings.deepFreeze) {
+            for (let key of objectKeys(this)) {
+                const propertyValue = (this as any)[key];
+                if (propertyValue !== originalProperties[key] && typeof propertyValue === 'object' && propertyValue) {
+                    deepFreeze(propertyValue);
+                }
             }
         }
 

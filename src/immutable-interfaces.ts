@@ -41,6 +41,12 @@ export interface ImmutableSettings {
      * Has a negative performance impact, only enable in development and testing.
      */
     checkMutability: boolean;
+
+    /**
+     * Enable deep freezing properties of @Immutable instances.
+     * Has a negative performance impact in some runtimes, only enable in development and testing.
+     */
+    deepFreeze: boolean;
 }
 
 /** @internal */

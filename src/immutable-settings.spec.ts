@@ -10,15 +10,16 @@ describe('immutableSettings', () => {
     describe('(global)', () => {
 
         it('changes the global settings when called without a target', () => {
-            immutableSettings({ checkMutability: true });
+            immutableSettings({ checkMutability: true, deepFreeze: false });
             expect(getSettings()!.checkMutability).to.be.true;
-            immutableSettings({ checkMutability: false });
+            immutableSettings({ checkMutability: false, deepFreeze: false });
             expect(getSettings()!.checkMutability).to.be.false;
         });
 
         it('does not store the passed reference', () => {
             const settingsThatChange: ImmutableSettings = {
-                checkMutability: true
+                checkMutability: true,
+                deepFreeze: false
             };
             immutableSettings(settingsThatChange);
 
@@ -35,12 +36,12 @@ describe('immutableSettings', () => {
             @Immutable()
             class TestClass { }
 
-            immutableSettings(TestClass, { checkMutability: true });
+            immutableSettings(TestClass, { checkMutability: true, deepFreeze: false });
             expect(getImmutableClassMetadata(TestClass)).not.to.be.undefined;
         });
 
         it('stores the settings by reference', () => {
-            const settings: ImmutableSettings = { checkMutability: true };
+            const settings: ImmutableSettings = { checkMutability: true, deepFreeze: false };
             @Immutable()
             class TestClass { }
             immutableSettings(TestClass, settings);
@@ -64,7 +65,7 @@ describe('getSettings (internal)', () => {
         @Immutable()
         class TestClass { }
 
-        const settings: ImmutableSettings = { checkMutability: true };
+        const settings: ImmutableSettings = { checkMutability: true, deepFreeze: false };
         immutableSettings(TestClass, settings);
         const target = new TestClass();
 
@@ -75,11 +76,11 @@ describe('getSettings (internal)', () => {
     });
 
     it('returns the global settings if the target has no settings', () => {
-        immutableSettings({ checkMutability: true });
+        immutableSettings({ checkMutability: true, deepFreeze: false });
         const target = {};
         expect(getSettings(target)!.checkMutability).to.be.true;
 
-        immutableSettings({ checkMutability: false });
+        immutableSettings({ checkMutability: false, deepFreeze: false });
         expect(getSettings(target)!.checkMutability).to.be.false;
     });
 

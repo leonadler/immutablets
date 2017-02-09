@@ -17,7 +17,7 @@ describe('observeImmutable', () => {
             this.items = this.items.filter(item => item !== itemToRemove);
         }
     }
-    immutableSettings(ImmutableList, { checkMutability: true });
+    immutableSettings(ImmutableList, { checkMutability: true, deepFreeze: false });
 
     it('returns an observable stream that emits propery changes on method call', () => {
         const list = new ImmutableList<number>();
@@ -129,7 +129,7 @@ describe('observeImmutable', () => {
                 return this.currentNumber;
             }
         }
-        immutableSettings(Counter, { checkMutability: false })
+        immutableSettings(Counter, { checkMutability: false, deepFreeze: false })
 
         const counter = new Counter();
         const emittedChanges = [] as any[];

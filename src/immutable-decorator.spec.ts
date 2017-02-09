@@ -210,7 +210,7 @@ describe('createImmutableClass', () => {
     describe('generated method', () => {
 
         beforeEach(() => {
-            immutableSettings({ checkMutability: true });
+            immutableSettings({ checkMutability: true, deepFreeze: false });
         });
 
         it('is not bound to an instance', () => {
@@ -320,7 +320,7 @@ describe('createImmutableClass', () => {
                 }
             }
 
-            immutableSettings(BadContainerList, { checkMutability: true });
+            immutableSettings(BadContainerList, { checkMutability: true, deepFreeze: false });
 
             const state = new BadContainerList();
             expect(() => state.okayAdd({ id: 1, name: 'First container' }), 'error on "add first"').not.to.throw();
@@ -407,7 +407,7 @@ describe('createImmutableClass', () => {
                 }
             }
 
-            immutableSettings(BadAppState, { checkMutability: true });
+            immutableSettings(BadAppState, { checkMutability: true, deepFreeze: false });
 
             const state = new BadAppState();
             expect(() => state.okayChangeFolderName(2, 'Second folder with new name'), 'second').not.to.throw();
@@ -470,13 +470,88 @@ describe('createImmutableClass', () => {
         }
 
         it('keeps references not changed during call (with mutability checking)', () => {
-            immutableSettings({ checkMutability: true });
+            immutableSettings({ checkMutability: true, deepFreeze: false });
             keepsReferencesTest();
         });
 
         it('keeps references not changed during call (mutability checking disabled)', () => {
-            immutableSettings({ checkMutability: false });
+            immutableSettings({ checkMutability: false, deepFreeze: false });
             keepsReferencesTest();
+        });
+
+        it('uses Object.freeze on all properties if deepFreeze is set', () => {
+            interface Point { x: number, y: number };
+
+            @Immutable()
+            class ExampleClass {
+                coordinates: Point;
+                setCoordinates(x: number, y: number) {
+                    this.coordinates = { x, y };
+                }
+            }
+
+            immutableSettings(ExampleClass, { checkMutability: true, deepFreeze: true });
+
+            const instance = new ExampleClass();
+            instance.setCoordinates(5, 8);
+
+            expect(() => { instance.coordinates.x = 10; }).to.throw();
+            expect(Object.isFrozen(instance.coordinates)).to.be.true;
+        });
+
+        it('freezes the initial property values if deepFreeze is set', () => {
+            @Immutable()
+            class ExampleClass {
+                player = { id: 13, name: 'Player 1' };
+            }
+
+            immutableSettings(ExampleClass, { checkMutability: true, deepFreeze: true });
+
+            const instance = new ExampleClass();
+
+            expect(() => { instance.player.name = 'Not Player 1'; }).to.throw();
+            expect(Object.isFrozen(instance.player)).to.be.true;
+        });
+
+        it('uses Object.freeze on deep properties if deepFreeze is set', () => {
+            interface Point { x: number, y: number };
+            interface Player { name: string, position: Point };
+
+            @Immutable()
+            class ExampleClass {
+                players: Player[] = [];
+                addPlayer({ name, position }: { name: string, position: Point }) {
+                    this.players = [...this.players, { name, position }];
+                }
+            }
+
+            immutableSettings(ExampleClass, { checkMutability: true, deepFreeze: true });
+
+            const playerList = new ExampleClass();
+            playerList.addPlayer({ name: 'Player 1', position: { x: 20, y: 50 } });
+
+            expect(() => { playerList.players[0].position.x = 10; }).to.throw();
+            expect(Object.isFrozen(playerList.players[0].position)).to.be.true;
+        });
+
+        it('does not freeze properties if deepFreeze is set to false', () => {
+            interface Point { x: number, y: number };
+
+            @Immutable()
+            class ExampleClass {
+                coordinates: Point;
+                setCoordinates(x: number, y: number) {
+                    this.coordinates = { x, y };
+                }
+            }
+
+            immutableSettings(ExampleClass, { checkMutability: true, deepFreeze: false });
+
+            const instance = new ExampleClass();
+            instance.setCoordinates(5, 8);
+
+            expect(() => { instance.coordinates.x = 10; }).not.to.throw();
+            expect(Object.isFrozen(instance.coordinates)).to.be.false;
         });
 
     });
