@@ -598,4 +598,32 @@ describe('restoreUnchangedProperties (internal)', () => {
         expect(clone.list[1]).to.equal(original.list[1]);
     });
 
+    it('does not throw on null properties (original null)', () => {
+        const original = { key: { a: null } } as any;
+        const clone = { key: { a: { b: 1 } } };
+        const functionCall = () => restoreUnchangedProperties(clone, original, { key: 2 });
+        expect(functionCall).not.to.throw();
+    });
+
+    it('does not throw on null properties (clone null)', () => {
+        const original = { key: { a: { b: 1 } } };
+        const clone = { key: { a: null } } as any;
+        const functionCall = () => restoreUnchangedProperties(clone, original, { key: 2 });
+        expect(functionCall).not.to.throw();
+    });
+
+    it('does not throw on undefined properties (original undefined)', () => {
+        const original = { key: { a: undefined } } as any;
+        const clone = { key: { a: { b: 1 } } };
+        const functionCall = () => restoreUnchangedProperties(clone, original, { key: 2 });
+        expect(functionCall).not.to.throw();
+    });
+
+    it('does not throw on undefined properties (clone undefined)', () => {
+        const original = { key: { a: { b: 1 } } };
+        const clone = { key: { a: undefined } } as any;
+        const functionCall = () => restoreUnchangedProperties(clone, original, { key: 2 });
+        expect(functionCall).not.to.throw();
+    });
+
 });

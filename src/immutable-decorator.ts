@@ -226,7 +226,7 @@ export function restoreUnchangedProperties<T>(target: T, original: T, depth: num
 /** @internal */
 export function restoreUnchangedProperties(target: any, original: any, depthArg: number | { [k: string]: number }): void {
     for (let key of objectKeys(target)) {
-        if (typeof target[key] === 'object') {
+        if (typeof target[key] === 'object' && target[key] !== null) {
             const depth = typeof depthArg === 'number' ? depthArg : depthArg[key];
             if (depth > 0) {
                 restoreUnchangedProperties(target[key], original[key], depth - 1);
