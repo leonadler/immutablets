@@ -4,18 +4,37 @@ import { arraySlice, isArray, objectAssign, objectCreate, objectGetPrototypeOf }
  * Clones the provided array and passes it to the provided callback.
  * If any properties are changed in the callback, the clone is returned, the original otherwise.
  */
-export function withChanges<T>(original: ReadonlyArray<T>, callback: (original: T[]) => void): T[];
+export function withChanges<T>(original: ReadonlyArray<T>, callback: (clone: T[]) => void): T[];
 
 /**
  * Clones the provided object and passes it to the provided callback.
  * If any properties are changed in the callback, the clone is returned, the original otherwise.
  */
-export function withChanges<O extends Object>(original: Readonly<O>, callback: (original: O) => void): O;
+export function withChanges<O extends Object>(original: Readonly<O>, callback: (clone: O) => void): O;
+
+/**
+ * Clones the provided object and passes it to the provided callback.
+ * If any properties are changed in the callback, the clone is returned, the original otherwise.
+ *
+ * To use this function overload, you need to specify the hash type <T> explicitly.
+ */
+export function withChanges<T>(original: { [key: number]: T }, callback: (clone: { [key: number]: T }) => void): { [key: number]: T };
+
+/**
+ * Clones the provided object and passes it to the provided callback.
+ * If any properties are changed in the callback, the clone is returned, the original otherwise.
+ */
+export function withChanges<O extends Object>(original: O, callback: (clone: O) => void): O;
 
 /**
  * Clones the provided object if any of the properties would change, returns the original otherwise.
  */
-export function withChanges<O extends Object, K extends keyof O>(original: Readonly<O>, assignment: { [P in K]: O[P] }): O;
+export function withChanges<T>(original: { [key: number]: T }, assignment: { [key: number]: T }): { [key: number]: T };
+
+/**
+ * Clones the provided object if any of the properties would change, returns the original otherwise.
+ */
+export function withChanges<O extends Object, K extends keyof O>(original: Readonly<O>, assignment: { readonly [P in K]: O[P] }): O;
 
 
 export function withChanges(original: any, assignment: any): any {

@@ -292,4 +292,166 @@ describe('withChanges', () => {
 
     });
 
+    describe('TypeScript typings are correct', () => {
+
+        // These tests check the type inference of TypeScript.
+        // If TypeScript compiles this file sucessfully, everything is fine.
+
+        interface Person {
+            firstName: string;
+            lastName: string;
+        }
+
+        interface ReadonlyPerson {
+            readonly firstName: string;
+            readonly lastName: string;
+        }
+
+        it('for objects', () => {
+            let person: Person = { firstName: 'John', lastName: 'Doe' };
+
+            person = withChanges(person, {
+                firstName: 'Jane'
+            });
+            person = withChanges(person, p => {
+                let check: Person = p;
+                p.firstName = 'Jane';
+            });
+        });
+
+        it('for objects without explicit type', () => {
+            let person = {
+                firstName: 'John',
+                lastName: 'Doe'
+            };
+
+            person = withChanges(person, {
+                firstName: 'Jane'
+            });
+            person = withChanges(person, p => {
+                let check: string = p.firstName;
+                p.firstName = 'Jane';
+            });
+        });
+
+        it('for readonly objects', () => {
+            let readonlyPerson: ReadonlyPerson = { firstName: 'John', lastName: 'Doe' };
+
+            readonlyPerson = withChanges(readonlyPerson, {
+                firstName: 'Jane'
+            });
+            readonlyPerson = withChanges(readonlyPerson, p => {
+                let check: Person = p;
+                p.firstName = 'Jane';
+            });
+        });
+
+        it('for [number]: Object hashes', () => {
+            let personHash: { [id: number]: Person } = {
+                1: { firstName: 'John', lastName: 'Doe' }
+            };
+            personHash = withChanges(personHash, {
+                1: { firstName: 'Jane', lastName: 'Austen' }
+            });
+            personHash = withChanges<Person>(personHash, hash => {
+                let p: Person = hash[1];
+            });
+        });
+
+        it('for readonly [number]: Object hashes', () => {
+            let readonlyHash: { readonly [id: number]: Person } = {
+                1: { firstName: 'John', lastName: 'Doe' }
+            };
+            readonlyHash = withChanges(readonlyHash, {
+                1: { firstName: 'Jane', lastName: 'Austen' }
+            });
+            readonlyHash = withChanges<Person>(readonlyHash, hash => {
+                let p: Person = hash[1];
+                hash[1] = { firstName: 'Jane', lastName: 'Austen' };
+            });
+        });
+
+        it('for [number]: string hashes', () => {
+            let stringHash: { [id: number]: string } = {
+                1: 'first',
+                2: 'second'
+            };
+            stringHash = withChanges(stringHash, {
+                1: '1st'
+            });
+            stringHash = withChanges<string>(stringHash, hash => {
+                let s: string = hash[1];
+                hash[1] = '1st';
+            });
+        });
+
+        it('for readonly [number]: string hashes', () => {
+            let readonlyHash: { readonly [id: number]: string } = {
+                1: 'first',
+                2: 'second'
+            };
+            readonlyHash = withChanges(readonlyHash, {
+                1: '1st'
+            });
+            readonlyHash = withChanges<string>(readonlyHash, hash => {
+                let s: string = hash[1];
+                hash[1] = '1st';
+            });
+        });
+
+        it('for [string]: Object hashes', () => {
+            let personHash: { [id: string]: Person } = {
+                1: { firstName: 'John', lastName: 'Doe' }
+            };
+            personHash = withChanges(personHash, {
+                1: { firstName: 'Jane', lastName: 'Austen' }
+            });
+            personHash = withChanges(personHash, hash => {
+                let p: Person = hash[1];
+            });
+        });
+
+        it('for readonly [string]: Object hashes', () => {
+            let readonlyHash: { readonly [id: string]: Person } = {
+                1: { firstName: 'John', lastName: 'Doe' }
+            };
+            readonlyHash = withChanges(readonlyHash, {
+                1: { firstName: 'Jane', lastName: 'Austen' }
+            });
+            readonlyHash = withChanges(readonlyHash, hash => {
+                let p: Person = hash[1];
+                hash[1] = { firstName: 'Jane', lastName: 'Austen' };
+            });
+        });
+
+        it('for [string]: string hashes', () => {
+            let stringHash: { [id: string]: string } = {
+                1: 'first',
+                2: 'second'
+            };
+            stringHash = withChanges(stringHash, {
+                1: '1st'
+            });
+            stringHash = withChanges(stringHash, hash => {
+                let s: string = hash[1];
+                hash[1] = '1st';
+            });
+        });
+
+        it('for readonly [string]: string hashes', () => {
+            let readonlyHash: { readonly [id: string]: string } = {
+                1: 'first',
+                2: 'second'
+            };
+            readonlyHash = withChanges(readonlyHash, {
+                1: '1st'
+            });
+            readonlyHash = withChanges(readonlyHash, hash => {
+                let s: string = hash[1];
+                hash[1] = '1st';
+            });
+        });
+
+    });
+
 });
