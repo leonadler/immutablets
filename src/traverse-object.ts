@@ -5,7 +5,7 @@ import { objectKeys } from './utils';
  * Objects referenced more than once do not cause the callback to be called multiple times.
  */
 export function traverseObject(object: any, callback: (subject: any, path: string[]) => void): void {
-    if (typeof object !== 'object') return;
+    if (typeof object !== 'object' || !object) return;
     const traversed = new Set();
     const queue = [{ path: [] as string[], value: object }];
 
