@@ -4,6 +4,7 @@ import { immutableSettings } from './immutable-settings';
 import { observeImmutable } from './observe-immutable';
 import { TrackedMethodCall } from './immutable-interfaces';
 
+declare var performance: undefined | { now(): number };
 
 describe('observeImmutable', () => {
 
@@ -260,11 +261,14 @@ describe('observeImmutable', () => {
 
         testList.add('one');
         expect(trackedCalls).to.have.lengthOf(1);
+
+        setCallDurationToZero(trackedCalls);
         expect(trackedCalls[0]).to.deep.equal({
             instance: testList,
             methodName: 'add',
             arguments: ['one'],
             returnValue: undefined,
+            callDuration: 0,
             changes: {
                 list: { oldValue: [], newValue: ['one'] },
                 count: { oldValue: 0, newValue: 1 }
@@ -282,11 +286,14 @@ describe('observeImmutable', () => {
         testList.add('two')
 
         expect(trackedCalls).to.have.lengthOf(2);
+
+        setCallDurationToZero(trackedCalls);
         expect(trackedCalls[1]).to.deep.equal({
             instance: testList,
             methodName: 'add',
             arguments: ['two'],
             returnValue: undefined,
+            callDuration: 0,
             changes: {
                 list: { oldValue: ['one'], newValue: ['one', 'two'] },
                 count: { oldValue: 1, newValue: 2 }
@@ -323,11 +330,14 @@ describe('observeImmutable', () => {
 
         instance.setTo5And7();
         expect(trackedCalls).to.have.lengthOf(1);
+
+        setCallDurationToZero(trackedCalls);
         expect(trackedCalls[0]).to.deep.equal({
             instance: instance,
             methodName: 'setTo5And7',
             arguments: [],
             returnValue: 5 + 7,
+            callDuration: 0,
             changes: undefined,
             oldProperties: {
                 a: 5,
@@ -340,4 +350,53 @@ describe('observeImmutable', () => {
         });
     });
 
+    it('emits the duration of method calls', () => {
+
+        let timeProvider = (typeof performance === 'object') ? performance : Date;
+        let originalNow = timeProvider.now;
+
+        timeProvider.now = () => {
+            // Return first time + 1 second on next call
+            timeProvider.now = () => 1234567890 + 1000;
+            // Return first time
+            return 1234567890;
+        };
+
+        try {
+            @Immutable()
+            class CallDurationTest {
+                methodWhichRunsOneSecond(): void { }
+            }
+
+            const testInstance = new CallDurationTest();
+            const trackedCalls = [] as TrackedMethodCall<any>[];
+            observeImmutable(testInstance).subscribe(callInfo => trackedCalls.push(callInfo)),
+
+            expect(trackedCalls).to.have.lengthOf(0);
+
+            testInstance.methodWhichRunsOneSecond();
+            expect(trackedCalls).to.have.lengthOf(1);
+
+            expect(trackedCalls[0]).to.deep.equal({
+                instance: testInstance,
+                methodName: 'methodWhichRunsOneSecond',
+                arguments: [],
+                returnValue: undefined,
+                callDuration: 1000,
+                changes: undefined,
+                oldProperties: {},
+                newProperties: {}
+            });
+        } finally {
+            timeProvider.now = originalNow;
+        }
+    });
+
 });
+
+/** Since call duration varies from test to test, we force-set it to 0. */
+function setCallDurationToZero(calls: TrackedMethodCall<any>[]): void {
+    for (let call of calls || []) {
+        call.callDuration = 0;
+    }
+}

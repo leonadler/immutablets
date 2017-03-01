@@ -19,6 +19,8 @@ export interface TrackedMethodCall<T> {
     arguments: any[];
     /** The return value of the method. Passed by reference. */
     returnValue: any;
+    /** Cost of running the method in milliseconds. */
+    callDuration: number;
     /** A hash of all property values before the call. */
     oldProperties: { [K in keyof T]: T[K] },
     /** A hash of all property values after the call. */

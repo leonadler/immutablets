@@ -166,6 +166,7 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
                 methodName: actionName + '.' + actionMethodCall.methodName,
                 arguments: actionMethodCall.arguments,
                 returnValue: actionMethodCall.returnValue,
+                callDuration: actionMethodCall.callDuration,
                 changes: actionMethodCall.changes,
                 oldProperties: stateBefore,
                 newProperties: this.currentState,

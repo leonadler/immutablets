@@ -139,6 +139,8 @@ function createMethodWrapper(originalMethod: Function, methodName: string, class
 
         const originalProperties: any = {};
         let returnValue: any;
+        let timeBefore: Date;
+        let callDuration = -1;
 
         // Only check mutability when enabled (e.g. in development)
         const runAndCheckChanges = settings.checkMutability
@@ -153,9 +155,15 @@ function createMethodWrapper(originalMethod: Function, methodName: string, class
                 }
             }
 
+            timeBefore = new Date();
+            const timestampBefore = getTimestamp();
+
             instanceMetadata.callDepth++;
             try {
+                // Finally call the actual method
                 returnValue = originalMethod.apply(this, args);
+
+                callDuration = getTimestamp() - timestampBefore;
             } finally {
                 instanceMetadata.callDepth--;
             }
@@ -181,7 +189,7 @@ function createMethodWrapper(originalMethod: Function, methodName: string, class
             }
         }
 
-        // Notify all observers added by ObserveChanges
+        // Notify all observers added by observeImmutable
         const observers = instanceMetadata.observers;
         if (observers && observers.length > 0 && !instanceMetadata.callDepth) {
             const call: TrackedMethodCall<any> = {
@@ -189,6 +197,7 @@ function createMethodWrapper(originalMethod: Function, methodName: string, class
                 methodName,
                 arguments: args,
                 returnValue,
+                callDuration,
                 changes: undefined,
                 oldProperties: originalProperties,
                 newProperties: objectAssign({}, this)
@@ -242,4 +251,17 @@ export function restoreUnchangedProperties(target: any, original: any, depthArg:
 /** @internal */
 export function isConstructingImmutable(): boolean {
     return constructing;
+}
+
+declare var performance: undefined | { now(): number };
+/** @internal */
+function getTimestamp(): number {
+    if (typeof performance === 'object') {
+        // Cut values like 1234.8850000001 to 1234.885
+        return (performance.now() * 1000 | 0) * 0.001;
+    } else if (Date.now) {
+        return Date.now();
+    } else {
+        return +(new Date());
+    }
 }
