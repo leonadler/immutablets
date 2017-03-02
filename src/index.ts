@@ -8,6 +8,7 @@ export { immutableSettings } from './immutable-settings';
 export { ImmutableStateStore } from './immutable-state-store';
 export { isCyclicStructure } from './is-cyclic-structure';
 export { isImmutableClass } from './is-immutable-class';
+export { logMethodCallToConsole } from './log-call-to-console';
 export { map } from './map';
 export { MethodNotImmutableError } from './method-not-immutable-error';
 export { observeImmutable } from './observe-immutable';
