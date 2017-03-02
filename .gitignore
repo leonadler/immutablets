@@ -1,3 +1,6 @@
+declarations
 dist
+es5
+es6
 node_modules
 npm-debug*.log

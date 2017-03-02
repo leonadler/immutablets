@@ -1,5 +1,7 @@
 *
-!dist/**
+!declarations/**
+!es5/**
+!es6/**
 !package.json
 !LICENSE
 !README.md

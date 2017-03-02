@@ -1,0 +1,27 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "declaration": true,
+        "lib": [
+            "es5",
+            "es2015.core",
+            "es2015.collection",
+            "es2015.promise",
+            "es2015.reflect",
+            "es2015.symbol"
+        ],
+        "module": "commonjs",
+        "outDir": "es5",
+        "rootDir": "src",
+        "target": "es5"
+    },
+    "exclude": [
+        "**/*.spec.ts",
+        "dist",
+        "declarations",
+        "es5",
+        "es6",
+        "gulpfile.ts",
+        "node_modules"
+    ]
+}

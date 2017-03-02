@@ -57,7 +57,7 @@ export function Immutable(originalClass?: any): any {
 
 
 /** @internal */
-export function createImmutableClass<T, C extends ClassOf<T>>(originalClass: C): C {
+export function createImmutableClass<T extends {}, C extends ClassOf<T>>(originalClass: C): C {
 
     const originalMetadata = getImmutableClassMetadata(originalClass);
     const metadata: ImmutableClassMetadata = {

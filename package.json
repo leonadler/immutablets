@@ -19,11 +19,14 @@
     "url": "https://github.com/leonadler/immutablets/issues"
   },
   "homepage": "https://github.com/leonadler/immutablets#readme",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "es5/index.js",
+  "esnext:main": "es6/index.js",
+  "e2015": "es6/index.js",
+  "typings": "declarations/index.d.ts",
   "scripts": {
     "build": "gulp build",
-    "prepublish": "gulp build",
+    "build-tsc": "tsc -p tsconfig.es5.json && tsc -p tsconfig.es6.json",
+    "prepublish": "gulp default",
     "test": "mocha --require ts-node/register --require source-map-support/register src/**/*.spec.ts",
     "watch-tests": "mocha --watch --reporter min --require ts-node/register --require source-map-support/register src/**/*.spec.ts",
     "watch": "gulp watch"
@@ -35,6 +38,7 @@
     "@types/gulp-sourcemaps": "0.0.29",
     "@types/gulp-typescript": "0.0.32",
     "@types/gulp-util": "^3.0.30",
+    "@types/merge2": "^0.3.29",
     "@types/mocha": "^2.2.33",
     "@types/orchestrator": "0.0.30",
     "@types/source-map-support": "^0.2.28",
@@ -45,10 +49,11 @@
     "gulp-mocha": "^3.0.1",
     "gulp-sourcemaps": "^2.3.1",
     "gulp-typescript": "^3.1.5",
+    "merge2": "^1.0.3",
     "mocha": "^3.1.0",
     "reflect-metadata": "^0.1.9",
     "source-map-support": "^0.4.6",
     "ts-node": "^2.0.0",
-    "typescript": "^2.3.0-dev.20170301"
+    "typescript": "^2.2.1"
   }
 }
