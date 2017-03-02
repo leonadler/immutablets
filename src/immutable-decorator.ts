@@ -4,10 +4,9 @@ import { functionMutatesInput } from './function-mutates-input';
 import { ClassOf, ImmutableClassMetadata, TrackedMethodCall, ImmutableInstanceMetadata } from './immutable-interfaces';
 import { globalSettings } from './immutable-settings';
 import { MethodNotImmutableError } from './method-not-immutable-error';
-import { getInstanceMetadata, setInitialInstanceMetadata } from './utils';
 import { deepFreeze } from './deep-freeze';
-import { getFunctionName, getImmutableClassMetadata, hasOwnProperty, objectAssign, objectCreate,
-    objectDefineProperty, objectKeys, setImmutableClassMetadata } from './utils';
+import { getFunctionName, getImmutableClassMetadata, getInstanceMetadata, hasOwnProperty, objectAssign, objectCreate,
+    objectDefineProperty, objectKeys, setImmutableClassMetadata, setInitialInstanceMetadata } from './utils';
 
 
 let constructing: boolean = false;
