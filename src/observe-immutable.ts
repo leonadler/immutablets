@@ -6,7 +6,7 @@ import { getFunctionName, objectGetPrototypeOf, getInstanceMetadata } from './ut
  * Get notified when a method of an @Immutable class instance is called and of any changed properties.
  * To use the rxjs observables your project uses, you need to pass the `Observable` class.
  */
-export function observeImmutable<T, O extends Subscribable<TrackedMethodCall<T>>>(instance: T, observableClass: { new(): O }): O;
+export function observeImmutable<T, O extends Subscribable<TrackedMethodCall<T>>, C extends { new(): O }>(instance: T, observableClass: C): O;
 
 /**
  * Get notified when a method of an @Immutable class instance is called and of any changed properties.
