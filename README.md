@@ -98,6 +98,7 @@ When the method creates a new object instead of changing an existing one, no err
 * [How to use](docs/how-to-use.md)
 * [@Immutable](docs/immutable-decorator.md)
 * [ImmutableStateStore](docs/immutable-state-store.md)
+* [Utility functions](docs/utility-functions.md)
 
 ## License
 

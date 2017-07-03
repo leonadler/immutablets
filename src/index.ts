@@ -1,6 +1,8 @@
 export { CloneDepth } from './clone-depth-decorator';
+export { deepApplyWithReuse } from './deep-apply-with-reuse';
 export { deepClone } from './deep-clone';
 export { deepEqual } from './deep-equal';
+export { deepFreeze } from './deep-freeze';
 export { flatEqual } from './flat-equal';
 export { Immutable } from './immutable-decorator';
 export { AnonymousSubscription, PartialObserver, Subscribable, TrackedMethodCall } from './immutable-interfaces';
