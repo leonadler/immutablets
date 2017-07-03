@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/immutablets.svg)](https://www.npmjs.com/package/immutablets)
 [![travis build status](https://travis-ci.org/leonadler/immutablets.svg)](https://travis-ci.org/leonadler/immutablets/)
 
-Designed for use with rxjs observables and angular2, but works without dependencies.
+Designed for use with rxjs observables and Angular, but works without dependencies.
 
 
 ## What is an immutable application state?
