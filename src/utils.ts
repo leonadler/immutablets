@@ -31,6 +31,11 @@ export function getFunctionArgs(fn: Function): string[] {
 }
 
 /** @internal */
+export function bothEqualNaN(a: any, b: any): boolean {
+    return typeof a === 'number' && typeof b === 'number' && a !== a && b !== b;
+}
+
+/** @internal */
 const functionRx = /^\s*(?:function\*? *([^)\n]*)\(([^)]*)\)|([^\s=\(,]+) *=>|\(([^\)]*)\) *=>|(\w+)\((?!function)([^)\n=<>]*?)\) *\{)/;
 
 /**
@@ -139,7 +144,7 @@ export function setInitialInstanceMetadata(target: any): void {
 }
 
 /** @internal Short-hand method for Array.prototype.slice(). */
-export const arraySlice: <T>(arr: T[]) => T[] = Function.prototype.call.bind(Array.prototype.slice);
+export const arraySlice: <T>(arr: ArrayLike<T>) => T[] = Function.prototype.call.bind(Array.prototype.slice);
 
 /** @internal Short-hand method for Object.hasOwnProperty(). */
 export const hasOwnProperty: (obj: any, prop: string) => obj is typeof obj & { [prop]: any } = Function.call.bind(Object.prototype.hasOwnProperty);

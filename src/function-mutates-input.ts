@@ -1,7 +1,7 @@
 import { deepClone } from './deep-clone';
 import { deepEqual } from './deep-equal';
 import { traverseObject } from './traverse-object';
-import { objectAssign, objectKeys } from './utils';
+import { objectAssign, objectKeys, bothEqualNaN } from './utils';
 
 export interface ChangedProperty {
     path: string[];
@@ -65,16 +65,17 @@ function checkSnapshotChanges(snapshotMap: Snapshot): ChangedProperty[] {
 
         for (let key of newKeys) {
             const newValue = object[key];
+            const oldValue = snapshot.value[key];
 
             if (oldKeys.indexOf(key) < 0) {
                 changes.push({
                     path: [...snapshot.path, key],
                     newValue
                 });
-            } else if (newValue !== snapshot.value[key]) {
+            } else if (newValue !== oldValue && !bothEqualNaN(newValue, oldValue)) {
                 changes.push({
                     path: [...snapshot.path, key],
-                    oldValue: snapshot.value[key],
+                    oldValue: oldValue,
                     newValue
                 })
             }

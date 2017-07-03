@@ -145,4 +145,12 @@ describe('functionMutatesInput', () => {
         });
     });
 
+    it('handles NaN correctly', () => {
+        function emptyFunction() { };
+        const input = {
+            propWithNaN: NaN
+        };
+        expect(functionMutatesInput(emptyFunction, [], input)).to.be.false;
+    });
+
 });

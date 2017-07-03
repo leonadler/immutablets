@@ -28,6 +28,10 @@ describe('flatEqual', () => {
         expect(flatEqual(5, 5)).to.be.true;
     });
 
+    it('returns true for (NaN, NaN)', () => {
+        expect(flatEqual(NaN, NaN)).to.be.true;
+    });
+
     it('returns true for (true, true)', () => {
         expect(flatEqual(true, true)).to.be.true;
     });
@@ -112,8 +116,16 @@ describe('flatEqual', () => {
         expect(flatEqual([true], [false])).to.be.false;
     });
 
+    it('returns true for ([NaN], [NaN])', () => {
+        expect(flatEqual([NaN], [NaN])).to.be.true;
+    });
+
     it('returns false for ([{}], [{}])', () => {
         expect(flatEqual([{}], [{}])).to.be.false;
+    });
+
+    it('returns true for ({a: NaN}, {a: NaN})', () => {
+        expect(flatEqual({a: NaN}, {a: NaN})).to.be.true;
     });
 
     it('does not deep-compare objects', () => {

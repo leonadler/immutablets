@@ -429,6 +429,26 @@ describe('createImmutableClass', () => {
             expect(() => list.add('Hello World')).not.to.throw();
         });
 
+        it('does not throw when a value is NaN', () => {
+            @Immutable()
+            class NaNTestCase {
+                @CloneDepth(1) person = { age: 30 };
+
+                setAge(age: number) {
+                    this.person.age = age;
+                }
+            }
+
+            let changesEmitted = 0;
+            const nanTest = new NaNTestCase();
+            function setAgeToNaN() {
+                nanTest.setAge(Number.NaN);
+            }
+
+            expect(setAgeToNaN).not.to.throw('mutates properties', 'throws on first call');
+            expect(setAgeToNaN).not.to.throw('mutates properties', 'throws on second call');
+        });
+
         it('throws when a parameter is changed', () => {
             @Immutable()
             class ArgumentChangingClass {

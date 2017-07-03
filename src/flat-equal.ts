@@ -1,4 +1,4 @@
-import { objectKeys } from './utils';
+import { bothEqualNaN, objectKeys } from './utils';
 
 /**
  * Returns true if a and b have the same properties and all properties have the same value.
@@ -8,10 +8,14 @@ export function flatEqual<T>(a: T, b: T): boolean;
 export function flatEqual(a: any, b: any): boolean {
     if (a === b) {
         return true;
+    } else if (bothEqualNaN(a, b)) {
+        return true;
     } else if (!a || !b || typeof a !== 'object') {
         return false;
     }
     const keysA = objectKeys(a);
     const keysB = objectKeys(b);
-    return keysA.length === keysB.length && keysA.every(key => a[key] === b[key]);
+    return keysA.length === keysB.length && keysA.every(key =>
+        a[key] === b[key] || bothEqualNaN(a[key], b[key])
+    );
 }
