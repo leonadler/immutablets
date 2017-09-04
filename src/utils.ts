@@ -143,26 +143,26 @@ export function setInitialInstanceMetadata(target: any): void {
     }
 }
 
-/** @internal Short-hand method for Array.prototype.slice(). */
+/** @internal Short-hand function for Array.prototype.slice(). */
 export const arraySlice: <T>(arr: ArrayLike<T>) => T[] = Function.prototype.call.bind(Array.prototype.slice);
 
-/** @internal Short-hand method for Object.hasOwnProperty(). */
-export const hasOwnProperty: (obj: any, prop: string) => obj is typeof obj & { [prop]: any } = Function.call.bind(Object.prototype.hasOwnProperty);
+/** @internal Short-hand function for Object.hasOwnProperty(). */
+export const hasOwnProperty: <O, P extends string>(obj: O, prop: P) => obj is O & { [K in P]: any } = Function.call.bind(Object.prototype.hasOwnProperty);
 
-/** @internal Short-hand method for Array.isArray(). */
+/** @internal Short-hand function for Array.isArray(). */
 export const isArray = Array.isArray;
 
-/** @internal Short-hand method for Object.keys(). */
+/** @internal Short-hand function for Object.keys(). */
 export const objectKeys = Object.keys;
 
-/** @internal Short-hand method for Object.assign(). */
+/** @internal Short-hand function for Object.assign(). */
 export const objectAssign = Object.assign;
 
-/** @internal Short-hand method for Object.assign(). */
+/** @internal Short-hand function for Object.assign(). */
 export const objectCreate = Object.create;
 
-/** @internal Short-hand method for Object.defineProperty(). */
+/** @internal Short-hand function for Object.defineProperty(). */
 export const objectDefineProperty = Object.defineProperty;
 
-/** @internal Short-hand method for Object.getPrototypeOf(). */
+/** @internal Short-hand function for Object.getPrototypeOf(). */
 export const objectGetPrototypeOf = Object.getPrototypeOf;
