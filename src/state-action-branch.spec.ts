@@ -87,6 +87,6 @@ describe('StateActionBranch', () => {
         expect(instance).to.have.property('initialState');
         expect(instance).to.have.ownPropertyDescriptor('initialState');
         const descriptor = Object.getOwnPropertyDescriptor(instance, 'initialState');
-        expect(descriptor.enumerable).to.be.false;
+        expect(descriptor!.enumerable).to.be.false;
     });
 });

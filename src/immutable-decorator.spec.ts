@@ -116,8 +116,8 @@ describe('createImmutableClass', () => {
         const instance = new ExampleClass();
         const descriptor = Object.getOwnPropertyDescriptor(instance, 'someProp');
         expect(descriptor).not.to.be.undefined;
-        expect(descriptor.enumerable).to.be.false;
-        expect(descriptor.value).to.equal(1);
+        expect(descriptor!.enumerable).to.be.false;
+        expect(descriptor!.value).to.equal(1);
     });
 
     it('keeps methods in the prototype', () => {

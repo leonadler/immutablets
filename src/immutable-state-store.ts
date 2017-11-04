@@ -135,7 +135,7 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
     private propertiesChanged(instance: any, changes: ChangeList): void {
         const newState: any = { ...this.state as any };
         for (let changedProp in changes) {
-            const newValue = changes[changedProp].newValue;
+            const newValue = changes[changedProp]!.newValue;
             newState[changedProp] = newValue;
 
             for (let branchToUpdateName in this.actions) {

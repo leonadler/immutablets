@@ -72,10 +72,10 @@ export function createImmutableClass<T extends {}, C extends ClassOf<T>>(origina
         let instance = new originalClass(...args);
         constructing = false;
 
-        for (let key of Object.getOwnPropertyNames(instance) as (keyof T)[]) {
-            let descriptor = Object.getOwnPropertyDescriptor(instance, key);
-            objectDefineProperty(this, key, descriptor);
-        }
+        for (const key of Object.getOwnPropertyNames(instance) as (keyof T)[]) {
+            const descriptor = Object.getOwnPropertyDescriptor(instance, key);
+            objectDefineProperty(this, key, descriptor!);
+        }8
 
         setInitialInstanceMetadata(this);
 
@@ -112,7 +112,8 @@ export function createImmutableClass<T extends {}, C extends ClassOf<T>>(origina
     // Copy static methods and properties
     for (let staticKey of Object.getOwnPropertyNames(originalClass)) {
         if (!hasOwnProperty(mappedClass, staticKey)) {
-            objectDefineProperty(mappedClass, staticKey, Object.getOwnPropertyDescriptor(originalClass, staticKey));
+            const descriptor = Object.getOwnPropertyDescriptor(originalClass, staticKey);
+            objectDefineProperty(mappedClass, staticKey, descriptor!);
         }
     }
 

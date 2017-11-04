@@ -16,8 +16,7 @@ export function findMutatedProperties(fn: (firstArg: any) => any): MutatedProper
     const match = functionSource.match(sourceRx);
     if (!match) {
         return {
-            simple: false,
-            props: []
+            simple: false
         };
     }
 

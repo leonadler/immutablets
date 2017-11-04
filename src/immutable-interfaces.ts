@@ -27,8 +27,8 @@ export interface TrackedMethodCall<T> {
     newProperties: { [K in keyof T]: T[K] }
 }
 
-export interface ChangeList {
-    [propertyName: string]: {
+export type ChangeList<T = any> = {
+    [K in keyof T]?: {
         /** The property value before the method call. */
         oldValue: any;
         /** The property value after the method call. */
