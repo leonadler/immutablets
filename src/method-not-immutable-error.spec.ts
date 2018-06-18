@@ -44,7 +44,7 @@ describe('MethodNotImmutableError', () => {
 
         class ExampleClass1 {
             fruit: { name: string } = { name: 'apple' };
-            oldProp: 'removed';
+            oldProp = 'removed';
             testMethod() {
                 this.fruit.name = 'banana';
                 delete this.oldProp;

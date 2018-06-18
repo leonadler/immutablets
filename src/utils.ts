@@ -86,6 +86,8 @@ export function getImmutableClassMetadata(target: Function): Partial<ImmutableCl
             target = target && target.constructor;
         } while (target);
     }
+
+    return undefined;
 }
 
 /** @internal */
@@ -153,7 +155,7 @@ export const hasOwnProperty: <O, P extends string>(obj: O, prop: P) => obj is O 
 export const isArray = Array.isArray;
 
 /** @internal Short-hand function for Object.keys(). */
-export const objectKeys = Object.keys;
+export const objectKeys = Object.keys as <T>(object: T) => Array<keyof T & string>;
 
 /** @internal Short-hand function for Object.assign(). */
 export const objectAssign = Object.assign;

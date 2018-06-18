@@ -132,7 +132,7 @@ function createNamedFunction(name: string, realImplementation: (this: any, ...ar
 }
 
 function createMethodWrapper(originalMethod: Function, methodName: string, classMetadata: ImmutableClassMetadata): Function {
-    let wrapped = function immutableWrappedMethod(...args: any[]) {
+    let wrapped = function immutableWrappedMethod(this: any, ...args: any[]) {
 
         const { cloneDepth, originalClass, settings } = classMetadata;
         const instanceMetadata = (getInstanceMetadata(this) || {}) as ImmutableInstanceMetadata;
@@ -150,8 +150,9 @@ function createMethodWrapper(originalMethod: Function, methodName: string, class
         const mutations = runAndCheckChanges(() => {
             for (let key of objectKeys(this)) {
                 originalProperties[key] = this[key];
-                if (cloneDepth[key] > 0) {
-                    this[key] = deepClone(this[key], cloneDepth[key] - 1);
+                const propertyCloneDepth = (cloneDepth as any)[key];
+                if (propertyCloneDepth > 0) {
+                    this[key] = deepClone(this[key], propertyCloneDepth - 1);
                 }
             }
 
@@ -231,14 +232,12 @@ function createMethodWrapper(originalMethod: Function, methodName: string, class
 }
 
 /** @internal */
-export function restoreUnchangedProperties<T>(target: T, original: T, depth: number | { [K in keyof T]?: number }): void;
-/** @internal */
-export function restoreUnchangedProperties(target: any, original: any, depthArg: number | { [k: string]: number }): void {
+export function restoreUnchangedProperties<T>(target: T, original: T, depth: number | { [K in keyof T]?: number }): void {
     for (let key of objectKeys(target)) {
         if (typeof target[key] === 'object' && target[key] !== null) {
-            const depth = typeof depthArg === 'number' ? depthArg : depthArg[key];
-            if (depth > 0) {
-                restoreUnchangedProperties(target[key], original[key], depth - 1);
+            const propDepth = typeof depth === 'number' ? depth : (depth[key] || 0) as number;
+            if (propDepth > 0) {
+                restoreUnchangedProperties(target[key], original[key], propDepth - 1);
 
                 if (target[key] !== original[key] && flatEqual(target[key], original[key])) {
                     target[key] = original[key];

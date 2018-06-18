@@ -5,7 +5,7 @@ import { getFunctionName, parseFunctionSource } from './utils';
 describe('getFunctionName (internal)', () => {
 
     it('can get the name of a compiled method', () => {
-        function FakeClass() {
+        function FakeClass(this: { x: number, y: number }) {
             this.x = 5;
             this.y = 7;
         }

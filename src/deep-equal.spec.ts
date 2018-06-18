@@ -127,24 +127,24 @@ describe('deepEqual()', () => {
     });
 
     it('returns true for (SomeClass {a: 1}, SomeClass {a: 1})', () => {
-        class SomeClass { a: number; };
+        class SomeClass { a!: number; };
         let objA = new SomeClass(); objA.a = 1;
         let objB = new SomeClass(); objB.a = 1;
         expect(deepEqual(objA, objB)).to.be.true;
     });
 
     it('returns false for (SomeClass {a: 1}, SomeClass {a: 2})', () => {
-        class SomeClass { a: number; }
+        class SomeClass { a!: number; }
         let objA = new SomeClass(); objA.a = 1;
         let objB = new SomeClass(); objB.a = 2;
         expect(deepEqual(objA, objB)).to.be.false;
     });
 
     it('returns false for (SomeClass {a: 1}, OtherClass {a: 1})', () => {
-        class SomeClass { a: number; };
+        class SomeClass { a!: number; };
         let objA = new SomeClass(); objA.a = 1;
 
-        class OtherClass { a: number; };
+        class OtherClass { a!: number; };
         let objB = new OtherClass(); objB.a = 1;
 
         expect(deepEqual(objA, objB)).to.be.false;

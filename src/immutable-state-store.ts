@@ -12,7 +12,7 @@ export class ImmutableStateStore<StateType, ActionsType extends { [key: string]:
     }
     readonly actions: ActionsType;
 
-    private currentState: StateType;
+    private currentState!: StateType;
     private observers: Array<(state: StateType) => void>;
     private callObservers: Array<(call: TrackedMethodCall<StateType>) => void>;
     private subscriptions: AnonymousSubscription[];

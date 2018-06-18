@@ -320,7 +320,7 @@ type ActionTypes = {
 @Immutable()
 class ShoppingCartActions extends StateActionBranch<ApplicationState> {
     @CloneDepth(1)
-    private shoppingCart: ShoppingCartState;
+    private shoppingCart!: ShoppingCartState;
 
     constructor() {
         super({
@@ -349,7 +349,7 @@ class ShoppingCartActions extends StateActionBranch<ApplicationState> {
 @Immutable()
 class WarehouseActions extends StateActionBranch<ApplicationState> {
     @CloneDepth(1)
-    private warehouse: WarehouseState;
+    private warehouse!: WarehouseState;
 
     constructor() {
         super({

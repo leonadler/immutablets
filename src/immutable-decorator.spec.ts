@@ -439,7 +439,6 @@ describe('createImmutableClass', () => {
                 }
             }
 
-            let changesEmitted = 0;
             const nanTest = new NaNTestCase();
             function setAgeToNaN() {
                 nanTest.setAge(Number.NaN);
@@ -504,7 +503,7 @@ describe('createImmutableClass', () => {
 
             @Immutable()
             class ExampleClass {
-                coordinates: Point;
+                coordinates!: Point;
                 setCoordinates(x: number, y: number) {
                     this.coordinates = { x, y };
                 }
@@ -559,7 +558,7 @@ describe('createImmutableClass', () => {
 
             @Immutable()
             class ExampleClass {
-                coordinates: Point;
+                coordinates!: Point;
                 setCoordinates(x: number, y: number) {
                     this.coordinates = { x, y };
                 }

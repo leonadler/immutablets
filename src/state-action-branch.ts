@@ -6,7 +6,7 @@ import { getFunctionName, getImmutableClassMetadata, isArray, objectDefineProper
  * Abstract base class for state action branches of an {@link ImmutableStateStore}.
  */
 export abstract class StateActionBranch<StateType> {
-    protected readonly initialState: { [Branch in keyof StateType]?: StateType[Branch] | undefined };
+    protected readonly initialState!: { [Branch in keyof StateType]?: StateType[Branch] | undefined };
 
     constructor({ uses, initialState }: {
             uses: keyof StateType | (keyof StateType)[],

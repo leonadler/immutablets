@@ -7,7 +7,7 @@ describe('functionMutatesInput', () => {
         let argsForCall: any;
         let thisForCall: any;
 
-        function test(a: any, b: any, c: any) {
+        function test(this: any, a: any, b: any, c: any) {
             argsForCall = [a, b, c];
             thisForCall = this;
         }
@@ -74,7 +74,7 @@ describe('functionMutatesInput', () => {
     });
 
     it('detects when a function mutates properties of "this"', () => {
-        function thisTest(): void {
+        function thisTest(this: any): void {
             (this as any).oldProp = 'new value';
             (this as any).newProp = 'new property';
         }
@@ -94,7 +94,7 @@ describe('functionMutatesInput', () => {
     });
 
     it('detects when a function mutates a deep property of "this"', () => {
-        function nestedThisTest(): void {
+        function nestedThisTest(this: any): void {
             (this as any).coordinates[0].x = 20;
         }
 

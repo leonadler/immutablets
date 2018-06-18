@@ -44,7 +44,7 @@ export function deepClone(original: any, depth: number = Number.POSITIVE_INFINIT
         const clone = objectCreate(prototype);
         return clonePropsTo(clone, original, depth);
     } else if (typeofOriginal === 'function') {
-        const clone: any = function() {
+        const clone: any = function(this: any) {
             return original.apply(this, arguments);
         };
         return clonePropsTo(clone, original, depth);
