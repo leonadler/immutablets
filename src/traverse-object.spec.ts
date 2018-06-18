@@ -16,7 +16,7 @@ describe('traverseObject', () => {
 
         for (let value of valueTypes) {
             traverseObject(value, () => {
-                throw new Error(`callback should not be called for ${typeof value} ${value}`);
+                throw new Error(`callback should not be called for ${typeof value} ${String(value)}`);
             });
         }
     });
