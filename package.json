@@ -44,7 +44,7 @@
     "@types/vinyl": "^2.0.0",
     "chai": "^4.0.2",
     "del": "^3.0.0",
-    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp": "^4.0.0",
     "gulp-mocha": "^6.0.0",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-typescript": "^3.1.7",
