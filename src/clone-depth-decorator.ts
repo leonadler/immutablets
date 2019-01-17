@@ -1,7 +1,4 @@
-import { ClassOf } from './immutable-interfaces';
-import { getFunctionName, getImmutableClassMetadata, setImmutableClassMetadata } from './utils';
-import { isImmutableClass } from './is-immutable-class';
-
+import { getImmutableClassMetadata, setImmutableClassMetadata } from './utils';
 
 /**
  * Property decorator that defines a cloning depth for @Immutable.
@@ -9,7 +6,7 @@ import { isImmutableClass } from './is-immutable-class';
  * The default cloning depth of 0 (@CloneDepth(0) can be omitted) means that every property
  * of the class decorated as @Immutable will be copied by-value ("flat cloned") when a property
  * of an instance is called. A depth of 1 copies every property of the property on method call.
- * 
+ *
  * @example
  *     @Immutable()
  *     class Example {

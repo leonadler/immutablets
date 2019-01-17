@@ -153,7 +153,7 @@ describe('createImmutableClass', () => {
         // This tests if the behavior stays as expected in the future.
 
         if (typeof Reflect !== 'object' || !('defineMetadata' in Reflect)) {
-            mocha.currentTest.skip('No support for Reflect.defineMetadata');
+            (mocha as any).currentTest.skip('No support for Reflect.defineMetadata');
             return;
         }
 
@@ -203,7 +203,7 @@ describe('createImmutableClass', () => {
             }
         }
 
-        let instance = new ExampleClass('Arial', 14);
+        new ExampleClass('Arial', 14);
         expect(calledWith).to.deep.equal(['Arial', 14]);
     });
 

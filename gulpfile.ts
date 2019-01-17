@@ -1,9 +1,8 @@
+import { spawn } from 'child_process';
 import * as del from 'del';
-const gulp = require('gulp');
-import * as mocha from 'gulp-mocha';
+import * as gulp from 'gulp';
 import * as sourcemaps from 'gulp-sourcemaps';
 import { createProject as createTypescriptProject } from 'gulp-typescript';
-import { log, colors } from 'gulp-util';
 import * as merge2 from 'merge2';
 import { install as installSourceMapSupport } from 'source-map-support';
 installSourceMapSupport();
@@ -55,29 +54,12 @@ function watch() {
     gulp.watch(['src/**/*.spec.ts'], gulp.series(test));
 }
 
-function test() {
-    const watching = process.argv.some(arg => arg === 'watch');
+function test(callback: (err?: Error) => void) {
     process.exitCode = 0;
 
-    return gulp.src(['src/**/*.spec.ts'])
-        .pipe(mocha({
-            reporter: watching ? 'min' : 'spec'
-        }))
-        .on('error', function (error: Error) {
-            if (error.name === 'TSError') {
-                log(colors.red(error.message));
-            } else if (!/^\s*\d+ tests? failed./.test(error.message)) {
-                log(colors.red(error.toString()));
-            }
-            process.exitCode = 1;
-            this.emit('end');
-        });
+    const mocha = __dirname + '/node_modules/mocha/bin/mocha';
+    const args = ['--require', 'ts-node/register', '--require', 'source-map-support/register', 'src/**/*.spec.ts'];
+    return spawn(mocha, args, { cwd: __dirname, stdio: 'inherit' });
 }
 
 gulp.task('default', gulp.series(clean, buildES5, buildES6, test));
-
-
-process.on('SIGINT', () => {
-    process.exit();
-    process.kill(process.pid);
-});

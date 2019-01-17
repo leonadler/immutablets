@@ -39,7 +39,7 @@ export function logMethodCallToConsole(call: TrackedMethodCall<any>): void {
 
         console.groupCollapsed('%cchanged state branches: %c' + changedBranches.join(', '), 'font-weight: normal', 'font-weight: bold');
         for (let key of changedBranches) {
-            console.log(`%c${key} changed from `, 'font-style: italic', call.changes[key].oldValue, ' to ', call.changes[key].newValue);
+            console.log(`%c${key} changed from `, 'font-style: italic', call.changes![key]!.oldValue, ' to ', call.changes![key]!.newValue);
         }
         console.groupEnd();
 

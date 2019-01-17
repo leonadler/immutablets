@@ -11,7 +11,7 @@ export class MethodNotImmutableError extends Error {
 
     readonly method: string;
     readonly class: string | undefined;
-    readonly diff: string;
+    readonly diff!: string;
 
     constructor(mutations: InputMutations,
                 originalMethod: Function,
