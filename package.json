@@ -34,12 +34,12 @@
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/del": "^3.0.1",
-    "@types/gulp": "^4.0.5",
+    "@types/gulp": "^4.0.6",
     "@types/gulp-sourcemaps": "0.0.32",
     "@types/merge2": "^1.1.4",
     "@types/mocha": "^5.2.5",
     "@types/orchestrator": "0.3.2",
-    "@types/source-map-support": "^0.4.1",
+    "@types/source-map-support": "^0.4.2",
     "@types/vinyl": "^2.0.2",
     "chai": "^4.2.0",
     "del": "^3.0.0",
@@ -49,8 +49,8 @@
     "merge2": "^1.2.3",
     "mocha": "^5.2.0",
     "reflect-metadata": "^0.1.13",
-    "source-map-support": "^0.5.10",
+    "source-map-support": "^0.5.12",
     "ts-node": "^7.0.1",
-    "typescript": "^3.2.2"
+    "typescript": "^3.2.4"
   }
 }
