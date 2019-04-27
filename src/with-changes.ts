@@ -34,7 +34,7 @@ export function withChanges<T>(original: { [key: number]: T }, assignment: { [ke
 /**
  * Clones the provided object if any of the properties would change, returns the original otherwise.
  */
-export function withChanges<O extends Object, K extends keyof O>(original: Readonly<O>, assignment: { readonly [P in K]: O[P] }): O;
+export function withChanges<O extends Object, K extends keyof O>(original: O, assignment: { readonly [P in K]: O[P] }): Readonly<O>;
 
 
 export function withChanges(original: any, assignment: any): any {
