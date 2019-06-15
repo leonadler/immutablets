@@ -20,8 +20,8 @@ import { getImmutableClassMetadata, setImmutableClassMetadata } from './utils';
  *         copiedByValueC = { alsoCopiedByValueC: { copiedByReferenceC: { prop: 3 } } };
  *     }
  */
-export function CloneDepth(depth: number): <T>(prototype: T, key: string, dontUseOnMethods?: undefined) => void {
-    return function CloneDepthDecorator<T>(prototype: T, key: string): void {
+export function CloneDepth(depth: number): <T extends { constructor: Function }>(prototype: T, key: string, dontUseOnMethods?: undefined) => void {
+    return function CloneDepthDecorator<T extends { constructor: Function }>(prototype: T, key: string): void {
         const existingMetadata = getImmutableClassMetadata(prototype.constructor);
         const cloneDepth = existingMetadata && existingMetadata.cloneDepth || {};
         const metaData = { ...(existingMetadata || {}), cloneDepth: { ...cloneDepth, [key]: depth} };
