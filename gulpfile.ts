@@ -57,7 +57,7 @@ function watch() {
 function test(callback: (err?: Error) => void) {
     process.exitCode = 0;
 
-    const mocha = __dirname + '/node_modules/mocha/bin/mocha';
+    const mocha = __dirname + '/node_modules/.bin/mocha' + (process.platform === 'win32' ? '.cmd' : '');
     const args = ['--require', 'ts-node/register', '--require', 'source-map-support/register', 'src/**/*.spec.ts'];
     return spawn(mocha, args, { cwd: __dirname, stdio: 'inherit' });
 }
