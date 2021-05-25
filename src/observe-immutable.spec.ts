@@ -351,9 +351,19 @@ describe('observeImmutable', () => {
     });
 
     it('emits the duration of method calls', () => {
+        const timeProvider = (typeof performance === 'object') ? performance : Date;
+        const originalNow = Object.getOwnPropertyDescriptor(timeProvider, 'now');
 
-        let timeProvider = (typeof performance === 'object') ? performance : Date;
-        let originalNow = timeProvider.now;
+        Object.defineProperty(timeProvider, 'now', {
+            configurable: true,
+            writable: true,
+            value: () => {
+                // Return first time + 1 second on next call
+                timeProvider.now = () => 1234567890 + 1000;
+                // Return first time
+                return 1234567890;
+            }
+        })
 
         timeProvider.now = () => {
             // Return first time + 1 second on next call
@@ -388,7 +398,9 @@ describe('observeImmutable', () => {
                 newProperties: {}
             });
         } finally {
-            timeProvider.now = originalNow;
+            if (originalNow) {
+                Object.defineProperty(timeProvider, 'now', originalNow);
+            }
         }
     });
 
